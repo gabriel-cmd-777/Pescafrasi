@@ -4,1937 +4,411 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>pescafrasi</title>
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-
 <style>
 :root{
-  --paper:#efece3;
-  --ink:#1d1b17;
-  --rule:#c9c3b3;
-  --pencil:#a13d2f;
-  --dim:#7c7666;
-  padding-top:env(safe-area-inset-top,0px);
-  padding-bottom:env(safe-area-inset-bottom,0px);
+  --paper:#efece3; --ink:#1d1b17; --rule:#c9c3b3; --pencil:#a13d2f; --dim:#7c7666;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
 }
-
 @media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){
-    --paper:#17160f;
-    --ink:#e8e4d8;
-    --rule:#3a3628;
-    --pencil:#e08a72;
-    --dim:#8e8874;
-  }
+  :root:not([data-theme="light"]){--paper:#17160f; --ink:#e8e4d8; --rule:#3a3628; --pencil:#e08a72; --dim:#8e8874;}
 }
-
-:root[data-theme="dark"]{
-  --paper:#17160f;
-  --ink:#e8e4d8;
-  --rule:#3a3628;
-  --pencil:#e08a72;
-  --dim:#8e8874;
-}
-
-*{
-  box-sizing:border-box;
-}
-
-html,body{
-  margin:0;
-  background:var(--paper);
-  color:var(--ink);
-}
-
-body{
-  font-family:Georgia,"Iowan Old Style",serif;
-  line-height:1.5;
-  padding:2rem 1.25rem 4rem;
-  max-width:640px;
-  margin:0 auto;
-}
-
-h1{
-  font-size:1.05rem;
-  font-weight:400;
-  font-style:italic;
-  letter-spacing:.02em;
-  margin:0 0 .25rem;
-}
-
-.sub{
-  font-family:ui-monospace,Menlo,monospace;
-  font-size:.72rem;
-  color:var(--dim);
-  margin:0 0 2rem;
-}
-
-section{
-  border-top:1px solid var(--rule);
-  padding:1.1rem 0;
-}
-
-section:first-of-type{
-  border-top:none;
-}
-
-label{
-  display:block;
-  font-family:ui-monospace,Menlo,monospace;
-  font-size:.7rem;
-  color:var(--dim);
-  margin-bottom:.4rem;
-}
-
-textarea,
-input[type=text]{
-  width:100%;
-  font-family:ui-monospace,Menlo,monospace;
-  font-size:.82rem;
-  background:transparent;
-  color:var(--ink);
-  border:1px solid var(--rule);
-  padding:.5rem .6rem;
-  border-radius:2px;
-}
-
-textarea{
-  min-height:4.5rem;
-  resize:vertical;
-}
-
-input[type=file]{
-  font-family:ui-monospace,Menlo,monospace;
-  font-size:.75rem;
-  color:var(--dim);
-  width:100%;
-}
-
-button{
-  font-family:ui-monospace,Menlo,monospace;
-  font-size:.75rem;
-  background:transparent;
-  color:var(--ink);
-  border:1px solid var(--ink);
-  padding:.5rem .85rem;
-  border-radius:2px;
-  cursor:pointer;
-  margin:.3rem .5rem .3rem 0;
-}
-
-button:hover{
-  background:var(--ink);
-  color:var(--paper);
-}
-
-button:disabled{
-  opacity:.3;
-  cursor:default;
-  background:transparent;
-  color:var(--ink);
-}
-
-button.ghost{
-  border-color:var(--rule);
-  color:var(--dim);
-}
-
-.status{
-  font-family:ui-monospace,Menlo,monospace;
-  font-size:.7rem;
-  color:var(--dim);
-  margin:.6rem 0;
-  min-height:1em;
-}
-
-.stage{
-  font-size:1.15rem;
-  padding:1rem 0;
-  min-height:3em;
-}
-
-.stage b{
-  color:var(--pencil);
-  font-weight:400;
-  font-style:italic;
-  border-bottom:1px solid var(--pencil);
-}
-
-.stage.empty{
-  color:var(--dim);
-  font-style:italic;
-  font-size:.9rem;
-}
-
-.accum{
-  font-size:.98rem;
-  margin:.5rem 0 0;
-}
-
-.accum p{
-  position:relative;
-  margin:0 0 1.6em;
-  padding-right:1.4em;
-}
-
-.accum p .rm{
-  position:absolute;
-  right:0;
-  top:.15em;
-  font-family:ui-monospace,Menlo,monospace;
-  font-size:.65rem;
-  color:var(--dim);
-  text-decoration:none;
-  opacity:.5;
-}
-
-.accum p .rm:hover{
-  opacity:1;
-}
-
-.accum p .src{
-  display:block;
-  font-family:ui-monospace,Menlo,monospace;
-  font-size:.65rem;
-  color:var(--dim);
-  margin-top:.25em;
-}
-
-.rowflex{
-  display:flex;
-  gap:.5rem;
-  align-items:flex-start;
-  flex-wrap:wrap;
-}
-
-.count{
-  color:var(--dim);
-}
+:root[data-theme="dark"]{--paper:#17160f; --ink:#e8e4d8; --rule:#3a3628; --pencil:#e08a72; --dim:#8e8874;}
+*{box-sizing:border-box;}
+html,body{margin:0;background:var(--paper);color:var(--ink);}
+body{font-family:Georgia,"Iowan Old Style",serif;line-height:1.5;padding:2rem 1.25rem 4rem;max-width:640px;margin:0 auto;}
+h1{font-size:1.05rem;font-weight:400;font-style:italic;letter-spacing:.02em;margin:0 0 .25rem;}
+.sub{font-family:ui-monospace,Menlo,monospace;font-size:.72rem;color:var(--dim);margin:0 0 2rem;}
+section{border-top:1px solid var(--rule);padding:1.1rem 0;}
+section:first-of-type{border-top:none;}
+label{display:block;font-family:ui-monospace,Menlo,monospace;font-size:.7rem;color:var(--dim);margin-bottom:.4rem;}
+textarea,input[type=text]{width:100%;font-family:ui-monospace,Menlo,monospace;font-size:.82rem;background:transparent;color:var(--ink);border:1px solid var(--rule);padding:.5rem .6rem;border-radius:2px;}
+textarea{min-height:4.5rem;resize:vertical;}
+input[type=file]{font-family:ui-monospace,Menlo,monospace;font-size:.75rem;color:var(--dim);width:100%;}
+button{font-family:ui-monospace,Menlo,monospace;font-size:.75rem;background:transparent;color:var(--ink);border:1px solid var(--ink);padding:.5rem .85rem;border-radius:2px;cursor:pointer;margin:.3rem .5rem .3rem 0;}
+button:hover{background:var(--ink);color:var(--paper);}
+button:disabled{opacity:.3;cursor:default;background:transparent;color:var(--ink);}
+button.ghost{border-color:var(--rule);color:var(--dim);}
+.status{font-family:ui-monospace,Menlo,monospace;font-size:.7rem;color:var(--dim);margin:.6rem 0;min-height:1em;}
+.stage{font-size:1.15rem;padding:1rem 0;min-height:3em;}
+.stage b{color:var(--pencil);font-weight:400;font-style:italic;border-bottom:1px solid var(--pencil);}
+.stage.empty{color:var(--dim);font-style:italic;font-size:.9rem;}
+.accum{font-size:.98rem;margin:.5rem 0 0;}
+.accum p{position:relative;margin:0 0 1.6em;padding-right:1.4em;}
+.accum p .rm{position:absolute;right:0;top:.15em;font-family:ui-monospace,Menlo,monospace;font-size:.65rem;color:var(--dim);text-decoration:none;opacity:.5;}
+.accum p .rm:hover{opacity:1;}
+.accum p .src{display:block;font-family:ui-monospace,Menlo,monospace;font-size:.65rem;color:var(--dim);margin-top:.25em;}
+#library p{margin:0 0 .3em;padding-right:1.4em;}
+#library .rm{opacity:.6;}
+.rowflex{display:flex;gap:.5rem;align-items:flex-start;flex-wrap:wrap;}
+.count{color:var(--dim);}
 </style>
 </head>
-
 <body>
 
 <h1>pescafrasi</h1>
-
-<p class="sub">
-  estrae frasi da EPUB, sostituzione seriale parola&nbsp;→&nbsp;parola
-</p>
+<p class="sub">estrae frasi da EPUB, sostituzione seriale parola&nbsp;→&nbsp;parola</p>
 
 <section id="cfg">
-
-  <label>
-    coppie parola-target → sostituto — una per riga, formato "originale &gt; sostituto"
-  </label>
-
-  <textarea
-    id="pairs"
-    placeholder="cosa &gt; poesia&#10;cose &gt; poesie"
-  ></textarea>
-
+  <label>coppie parola-target → sostituto — una per riga, formato "originale &gt; sostituto"</label>
+  <textarea id="pairs" placeholder="cosa &gt; poesia&#10;cose &gt; poesie"></textarea>
   <div class="rowflex" style="margin-top:.5rem;">
     <button id="savecfg">salva coppie</button>
     <span class="status" id="cfgstatus"></span>
   </div>
-
 </section>
 
 <section id="upload">
-
-  <label>carica uno o più file EPUB</label>
-
-  <input
-    type="file"
-    id="epubs"
-    accept=".epub"
-    multiple
-  >
-
+  <label>carica uno o più file EPUB — restano salvati nel browser</label>
+  <input type="file" id="epubs" accept=".epub" multiple>
   <div class="status" id="loadstatus"></div>
-
+  <div class="accum" id="library" style="font-size:.78rem;"></div>
 </section>
 
 <section id="fish">
-
   <div class="rowflex">
-
-    <button id="pesca" disabled>
-      pesca una frase
-    </button>
-
-    <button id="sost" disabled>
-      sostituisci
-    </button>
-
-    <button id="salva" disabled>
-      salva
-    </button>
-
+    <button id="pesca" disabled>pesca una frase</button>
+    <button id="sost" disabled>sostituisci</button>
+    <button id="salva" disabled>salva</button>
   </div>
-
-  <div class="stage empty" id="stage">
-    carica gli EPUB e imposta almeno una coppia per iniziare.
-  </div>
-
+  <div class="stage empty" id="stage">carica gli EPUB e imposta almeno una coppia per iniziare.</div>
 </section>
 
 <section id="saved">
-
-  <label>
-    frasi salvate (<span id="savedcount">0</span>)
-  </label>
-
+  <label>frasi salvate (<span id="savedcount">0</span>)</label>
   <div class="accum" id="savedlist"></div>
-
   <div class="rowflex" style="margin-top:.6rem;">
-
-    <button class="ghost" id="exportbtn">
-      esporta .docx
-    </button>
-
-    <button class="ghost" id="clearbtn">
-      svuota
-    </button>
-
+    <button class="ghost" id="exportbtn">esporta .docx</button>
+    <button class="ghost" id="clearbtn">svuota</button>
   </div>
-
 </section>
 
 <script>
+const $=id=>document.getElementById(id);
+let pairs=[]; // [{orig, sub}]
+let pool=[]; // [{text, matchWord, pairIdx}]
+let current=null; // {text, matchWord, pairIdx, substituted}
 
-/* =========================================================
-   RIFERIMENTI DOM
-   ========================================================= */
-
-const $ = id => document.getElementById(id);
-
-
-/* =========================================================
-   STATO
-   ========================================================= */
-
-let pairs = [];
-
-let pool = [];
-
-let current = null;
-
-let allParas = [];
-
-
-/* =========================================================
-   UTILITY
-   ========================================================= */
-
-function esc(s){
-  return String(s)
-    .replace(/&/g,'&amp;')
-    .replace(/</g,'&lt;');
-}
-
-
-function xmlEsc(s){
-  return String(s)
-    .replace(/&/g,'&amp;')
-    .replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;')
-    .replace(/"/g,'&quot;');
-}
-
-
-/* =========================================================
-   CONFIGURAZIONE COPPIE
-   ========================================================= */
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;');}
 
 function loadCfg(){
-
   try{
-
-    const raw =
-      localStorage.getItem('pescafrasi_pairs');
-
-    if(raw){
-
-      $('pairs').value = raw;
-
-      parsePairs();
-
-    }
-
+    const raw=localStorage.getItem('pescafrasi_pairs');
+    if(raw){ $('pairs').value=raw; parsePairs(); }
   }catch(e){}
-
 }
-
-
 function parsePairs(){
-
-  const lines =
-    $('pairs').value
-      .split('\n')
-      .map(l => l.trim())
-      .filter(Boolean);
-
-  pairs = lines
-    .map(l => {
-
-      const parts =
-        l.split('>');
-
-      if(parts.length < 2){
-        return {
-          orig:'',
-          sub:''
-        };
-      }
-
-      return {
-        orig:parts[0].trim(),
-        sub:parts.slice(1).join('>').trim()
-      };
-
-    })
-    .filter(p => p.orig && p.sub);
-
+  const lines=$('pairs').value.split('\n').map(l=>l.trim()).filter(Boolean);
+  pairs=lines.map(l=>{
+    const [o,s]=l.split('>').map(x=>x.trim());
+    return {orig:o, sub:s};
+  }).filter(p=>p.orig && p.sub);
   updateFishState();
-
 }
-
-
-$('savecfg').onclick = () => {
-
+$('savecfg').onclick=()=>{
   parsePairs();
-
-  try{
-
-    localStorage.setItem(
-      'pescafrasi_pairs',
-      $('pairs').value
-    );
-
-  }catch(e){}
-
-  $('cfgstatus').textContent =
-    pairs.length
-      ? pairs.length + ' coppie attive'
-      : 'nessuna coppia valida';
-
+  try{ localStorage.setItem('pescafrasi_pairs', $('pairs').value); }catch(e){}
+  $('cfgstatus').textContent = pairs.length ? pairs.length+' coppie attive' : 'nessuna coppia valida';
   rebuildPool();
-
 };
-
-
-/* =========================================================
-   REGEX PAROLE
-   ========================================================= */
 
 function wordRegex(word){
-
-  const escaped =
-    word.replace(
-      /[.*+?^${}()|[\]\\]/g,
-      '\\$&'
-    );
-
-  return new RegExp(
-    '(?<![A-Za-zÀ-ÿ])(' +
-    escaped +
-    ')(?![A-Za-zÀ-ÿ])',
-    'i'
-  );
-
+  return new RegExp('(?<![A-Za-zÀ-ÿ])('+word.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')(?![A-Za-zÀ-ÿ])','i');
 }
-
-
-/* =========================================================
-   HASH
-   ========================================================= */
 
 function hashText(s){
-
-  let h = 5381;
-
-  for(let i=0;i<s.length;i++){
-
-    h =
-      ((h * 33) ^
-      s.charCodeAt(i)) >>> 0;
-
-  }
-
+  let h=5381;
+  for(let i=0;i<s.length;i++) h=((h*33)^s.charCodeAt(i))>>>0;
   return h.toString(36);
-
 }
-
-
-/* =========================================================
-   FRASE GIÀ MOSTRATA
-   ========================================================= */
 
 function loadShown(){
-
-  try{
-
-    return new Set(
-      JSON.parse(
-        localStorage.getItem(
-          'pescafrasi_shown'
-        ) || '[]'
-      )
-    );
-
-  }catch(e){
-
-    return new Set();
-
-  }
-
+  try{ return new Set(JSON.parse(localStorage.getItem('pescafrasi_shown')||'[]')); }catch(e){ return new Set(); }
 }
-
-
 let shown = loadShown();
-
-
 function markShown(hash){
-
   shown.add(hash);
-
-  try{
-
-    localStorage.setItem(
-      'pescafrasi_shown',
-      JSON.stringify([...shown])
-    );
-
-  }catch(e){}
-
+  try{ localStorage.setItem('pescafrasi_shown', JSON.stringify([...shown])); }catch(e){}
 }
 
-
-/* =========================================================
-   INDEXED DB
-   ========================================================= */
-
-const DB_NAME = 'pescafrasi_db';
-
-const DB_VERSION = 1;
-
-const STORE_NAME = 'epubs';
-
-
-function openDB(){
-
-  return new Promise((resolve,reject)=>{
-
-    const request =
-      indexedDB.open(
-        DB_NAME,
-        DB_VERSION
-      );
-
-    request.onupgradeneeded = () => {
-
-      const db = request.result;
-
-      if(!db.objectStoreNames.contains(STORE_NAME)){
-
-        db.createObjectStore(
-          STORE_NAME,
-          {
-            keyPath:'id'
-          }
-        );
-
-      }
-
-    };
-
-    request.onsuccess = () => {
-
-      resolve(request.result);
-
-    };
-
-    request.onerror = () => {
-
-      reject(request.error);
-
-    };
-
+// --- libreria EPUB persistente (IndexedDB) ---
+function openLibDB(){
+  return new Promise((res,rej)=>{
+    const req=indexedDB.open('pescafrasiLib',1);
+    req.onupgradeneeded=e=>{ e.target.result.createObjectStore('epubs'); };
+    req.onsuccess=e=>res(e.target.result);
+    req.onerror=e=>rej(e);
   });
-
 }
-
-
-async function saveEpub(file){
-
-  const db = await openDB();
-
-  const buffer =
-    await file.arrayBuffer();
-
-  const id =
-    file.name + '_' +
-    buffer.byteLength;
-
-  return new Promise((resolve,reject)=>{
-
-    const tx =
-      db.transaction(
-        STORE_NAME,
-        'readwrite'
-      );
-
-    const store =
-      tx.objectStore(STORE_NAME);
-
-    store.put({
-
-      id:id,
-
-      name:file.name,
-
-      data:buffer
-
-    });
-
-    tx.oncomplete = () => {
-
-      resolve();
-
-    };
-
-    tx.onerror = () => {
-
-      reject(tx.error);
-
-    };
-
+async function libPut(name, buf){
+  const db=await openLibDB();
+  return new Promise((res,rej)=>{
+    const tx=db.transaction('epubs','readwrite');
+    tx.objectStore('epubs').put(buf,name);
+    tx.oncomplete=()=>res(); tx.onerror=()=>rej(tx.error);
   });
-
 }
-
-
-async function getAllEpubs(){
-
-  const db = await openDB();
-
-  return new Promise((resolve,reject)=>{
-
-    const tx =
-      db.transaction(
-        STORE_NAME,
-        'readonly'
-      );
-
-    const store =
-      tx.objectStore(STORE_NAME);
-
-    const request =
-      store.getAll();
-
-    request.onsuccess = () => {
-
-      resolve(request.result || []);
-
-    };
-
-    request.onerror = () => {
-
-      reject(request.error);
-
-    };
-
+async function libDelete(name){
+  const db=await openLibDB();
+  return new Promise((res,rej)=>{
+    const tx=db.transaction('epubs','readwrite');
+    tx.objectStore('epubs').delete(name);
+    tx.oncomplete=()=>res(); tx.onerror=()=>rej(tx.error);
   });
-
+}
+async function libGetAll(){
+  const db=await openLibDB();
+  return new Promise((res,rej)=>{
+    const tx=db.transaction('epubs','readonly');
+    const store=tx.objectStore('epubs');
+    const kreq=store.getAllKeys();
+    kreq.onsuccess=()=>{
+      const keys=kreq.result;
+      const vreq=store.getAll();
+      vreq.onsuccess=()=> res(keys.map((k,i)=>({name:k, buf:vreq.result[i]})));
+      vreq.onerror=()=>rej(vreq.error);
+    };
+    kreq.onerror=()=>rej(kreq.error);
+  });
 }
 
-
-/* =========================================================
-   ESTRAZIONE TESTO EPUB
-   ========================================================= */
-
-/*
-  Gli EPUB non usano tutti la stessa struttura.
-
-  Alcuni hanno:
-
-      <p>...</p>
-
-  altri:
-
-      <div>...</div>
-
-  altri ancora:
-
-      <section>
-          <div>...</div>
-      </section>
-
-  e alcuni usano <br> per separare blocchi.
-
-  Il vecchio parser cercava esclusivamente <p>,
-  quindi con alcuni EPUB poteva finire per prendere
-  blocchi molto grandi, anche l'intera pagina.
-
-  Questa versione percorre ricorsivamente i blocchi
-  testuali e prende solamente i blocchi più interni.
-*/
-
-
-const BLOCK_TAGS = new Set([
-  'P',
-  'DIV',
-  'SECTION',
-  'ARTICLE',
-  'BLOCKQUOTE',
-  'LI',
-  'PRE'
-]);
-
-
-const IGNORE_TAGS = new Set([
-  'SCRIPT',
-  'STYLE',
-  'NOSCRIPT',
-  'NAV',
-  'HEADER',
-  'FOOTER',
-  'ASIDE',
-  'FIGURE',
-  'FIGCAPTION',
-  'SVG',
-  'IMG',
-  'AUDIO',
-  'VIDEO',
-  'CANVAS',
-  'TABLE',
-  'FORM'
-]);
-
-
-function cleanText(text){
-
-  return String(text)
-    .replace(/\u00A0/g,' ')
-    .replace(/\r/g,'')
-    .replace(/[ \t]+/g,' ')
-    .replace(/[ \t]*\n[ \t]*/g,'\n')
-    .trim();
-
+function renderLibrary(names){
+  $('library').innerHTML = names.length ? names.map(n=>
+    '<p>'+esc(n)+' <a class="rm" href="#" data-n="'+esc(n)+'">rimuovi</a></p>'
+  ).join('') : '';
 }
-
-
-/*
-  Restituisce il testo di un blocco mantenendo
-  temporaneamente i <br> come ritorni a capo.
-*/
-
-function textWithBreaks(element){
-
-  const clone =
-    element.cloneNode(true);
-
-  clone
-    .querySelectorAll('br')
-    .forEach(br => {
-
-      br.replaceWith(
-        document.createTextNode('\n')
-      );
-
-    });
-
-  return clone.textContent || '';
-
-}
-
-
-/*
-  Controlla se un elemento contiene altri elementi
-  che rappresentano blocchi testuali.
-
-  Se li contiene, l'elemento è un contenitore,
-  non il paragrafo vero e proprio.
-*/
-
-function hasMeaningfulBlockChild(element){
-
-  return [...element.children].some(
-    child =>
-      BLOCK_TAGS.has(child.tagName) &&
-      !IGNORE_TAGS.has(child.tagName)
-  );
-
-}
-
-
-/*
-  Aggiunge uno o più paragrafi all'array.
-
-  In presenza di più righe separate da <br>,
-  prova a distinguere i blocchi.
-
-  Se c'è una sola riga lunga, la considera un
-  singolo paragrafo.
-*/
-
-function addTextBlock(raw, output, source){
-
-  if(!raw) return;
-
-  const normalized =
-    raw
-      .replace(/\u00A0/g,' ')
-      .replace(/\r/g,'');
-
-  const doubleBreak =
-    normalized
-      .split(/\n\s*\n+/)
-      .map(x => cleanText(x))
-      .filter(x => x.length > 15);
-
-  if(doubleBreak.length > 1){
-
-    doubleBreak.forEach(text => {
-
-      output.push({
-        text:text,
-        source:source
-      });
-
-    });
-
-    return;
-
+$('library').addEventListener('click', async e=>{
+  if(e.target.classList.contains('rm')){
+    e.preventDefault();
+    await libDelete(e.target.dataset.n);
+    await reloadLibrary();
   }
+});
 
-
-  const lines =
-    normalized
-      .split(/\n+/)
-      .map(x => cleanText(x))
-      .filter(x => x.length > 0);
-
-
-  /*
-    Se ci sono diverse righe abbastanza lunghe,
-    le trattiamo come blocchi separati.
-
-    Questo serve soprattutto per EPUB che usano
-    <br> al posto di <p>.
-  */
-
-  const longLines =
-    lines.filter(x => x.length > 15);
-
-
-  if(longLines.length >= 2){
-
-    longLines.forEach(text => {
-
-      if(text.length > 15){
-
-        output.push({
-          text:text,
-          source:source
-        });
-
-      }
-
-    });
-
-    return;
-
+// Estrae paragrafi da un blocco di testo (gestisce sia <p> separati sia un unico
+// blocco con <br> multipli, comune in molti EPUB convertiti male)
+function extractParas(doc, source, out){
+  const blocks = [...doc.querySelectorAll('p,div,li,blockquote')]
+    .filter(el=>!el.querySelector('p,div,li,blockquote'));
+  for(const el of blocks){
+    const parts = el.innerHTML.split(/<br\s*\/?\s*>/i);
+    for(const part of parts){
+      const tmp=document.createElement('div');
+      tmp.innerHTML=part;
+      const t=tmp.textContent.replace(/\s+/g,' ').trim();
+      if(t.length>15) out.push({text:t, source});
+    }
   }
-
-
-  const text =
-    cleanText(
-      normalized.replace(/\n+/g,' ')
-    );
-
-
-  if(text.length > 15){
-
-    output.push({
-      text:text,
-      source:source
-    });
-
-  }
-
 }
 
-
-/*
-  Percorre il documento.
-
-  Se trova un contenitore con altri blocchi,
-  scende di livello.
-
-  Se trova un blocco senza altri blocchi,
-  quello è il candidato paragrafo.
-*/
-
-function collectTextBlocks(root, output, source){
-
-  for(const child of [...root.children]){
-
-    const tag =
-      child.tagName
-        ? child.tagName.toUpperCase()
-        : '';
-
-    if(IGNORE_TAGS.has(tag)){
-      continue;
-    }
-
-
-    if(BLOCK_TAGS.has(tag)){
-
-      if(hasMeaningfulBlockChild(child)){
-
-        collectTextBlocks(
-          child,
-          output,
-          source
-        );
-
-      }else{
-
-        const raw =
-          textWithBreaks(child);
-
-        addTextBlock(
-          raw,
-          output,
-          source
-        );
-
-      }
-
-    }else{
-
-      /*
-        Contenitori come <body>, <main>,
-        <html> ecc.
-      */
-
-      if(child.children.length){
-
-        collectTextBlocks(
-          child,
-          output,
-          source
-        );
-
-      }
-
-    }
-
+async function parseEpubBuffer(buf, name){
+  const zip = await JSZip.loadAsync(buf);
+  const paras=[];
+  const names = Object.keys(zip.files).filter(n=>/\.(xhtml|html|htm)$/i.test(n));
+  for(const fname of names){
+    const raw = await zip.files[fname].async('string');
+    let doc;
+    try{ doc = new DOMParser().parseFromString(raw,'application/xhtml+xml'); }
+    catch(e){ doc = null; }
+    if(!doc || doc.querySelector('parsererror')) doc = new DOMParser().parseFromString(raw,'text/html');
+    extractParas(doc, name, paras);
   }
-
-}
-
-
-/*
-  Legge un singolo file EPUB.
-*/
-
-async function readEpub(file){
-
-  const zip =
-    await JSZip.loadAsync(file);
-
-  const paras = [];
-
-  const names =
-    Object.keys(zip.files)
-      .filter(name =>
-        /\.(xhtml|html|htm)$/i.test(name)
-      );
-
-
-  for(const name of names){
-
-    const raw =
-      await zip.files[name]
-        .async('string');
-
-
-    let doc = null;
-
-
-    /*
-      Prima proviamo XHTML/XML.
-    */
-
-    try{
-
-      doc =
-        new DOMParser()
-          .parseFromString(
-            raw,
-            'application/xhtml+xml'
-          );
-
-    }catch(e){
-
-      doc = null;
-
-    }
-
-
-    /*
-      Se il parser XML ha prodotto un errore,
-      usiamo HTML.
-    */
-
-    if(
-      !doc ||
-      doc.querySelector('parsererror')
-    ){
-
-      doc =
-        new DOMParser()
-          .parseFromString(
-            raw,
-            'text/html'
-          );
-
-    }
-
-
-    if(!doc || !doc.body){
-      continue;
-    }
-
-
-    collectTextBlocks(
-      doc.body,
-      paras,
-      file.name
-    );
-
-  }
-
-
   return paras;
-
 }
 
-
-/* =========================================================
-   CARICAMENTO EPUB
-   ========================================================= */
-
-async function loadStoredEpubs(){
-
-  try{
-
-    const records =
-      await getAllEpubs();
-
-    allParas = [];
-
-    for(const record of records){
-
-      try{
-
-        const file =
-          new File(
-            [record.data],
-            record.name,
-            {
-              type:'application/epub+zip'
-            }
-          );
-
-        const paras =
-          await readEpub(file);
-
-        allParas =
-          allParas.concat(paras);
-
-      }catch(err){
-
-        console.error(
-          'Errore nella lettura di',
-          record.name,
-          err
-        );
-
-      }
-
-    }
-
-
-    if(records.length){
-
-      $('loadstatus').textContent =
-        allParas.length +
-        ' paragrafi letti da ' +
-        records.length +
-        ' EPUB salvati.';
-
-    }
-
-
-    rebuildPool();
-
-  }catch(err){
-
-    console.error(err);
-
+let allParas=[];
+async function reloadLibrary(){
+  $('loadstatus').textContent='lettura libreria…';
+  const items = await libGetAll();
+  renderLibrary(items.map(i=>i.name));
+  allParas=[];
+  for(const it of items){
+    try{ allParas = allParas.concat(await parseEpubBuffer(it.buf, it.name)); }
+    catch(e){ /* file corrotto: ignora */ }
   }
-
+  $('loadstatus').textContent = items.length
+    ? allParas.length+' paragrafi letti da '+items.length+' file in libreria.'
+    : 'nessun EPUB in libreria.';
+  rebuildPool();
 }
 
-
-/* =========================================================
-   UPLOAD EPUB
-   ========================================================= */
-
-$('epubs').onchange = async e => {
-
-  const files =
-    [...e.target.files];
-
-  if(!files.length){
-    return;
+$('epubs').onchange=async (e)=>{
+  const files=[...e.target.files];
+  if(!files.length) return;
+  $('loadstatus').textContent='salvataggio in corso…';
+  for(const f of files){
+    try{ await libPut(f.name, await f.arrayBuffer()); }
+    catch(err){ $('loadstatus').textContent='errore salvando '+f.name+'.'; return; }
   }
-
-
-  $('loadstatus').textContent =
-    'lettura in corso…';
-
-
-  try{
-
-    /*
-      Salviamo gli EPUB in IndexedDB.
-    */
-
-    for(const file of files){
-
-      await saveEpub(file);
-
-    }
-
-
-    /*
-      Rileggiamo tutti gli EPUB presenti,
-      compresi quelli già salvati.
-    */
-
-    await loadStoredEpubs();
-
-
-    $('loadstatus').textContent =
-      allParas.length +
-      ' paragrafi disponibili da EPUB salvati.';
-
-  }catch(err){
-
-    console.error(err);
-
-    $('loadstatus').textContent =
-      'errore nella lettura degli EPUB.';
-
-  }
-
+  e.target.value='';
+  await reloadLibrary();
 };
-
-
-/* =========================================================
-   COSTRUZIONE POOL
-   ========================================================= */
 
 function rebuildPool(){
-
-  pool = [];
-
-  if(
-    !pairs.length ||
-    !allParas.length
-  ){
-
-    updateFishState();
-
-    return;
-
-  }
-
-
-  let skipped = 0;
-
-
+  pool=[];
+  if(!pairs.length || !allParas.length){ updateFishState(); return; }
+  let skipped=0;
   for(const para of allParas){
-
-    const h =
-      hashText(para.text);
-
-
-    if(shown.has(h)){
-
-      skipped++;
-
-      continue;
-
-    }
-
-
+    const h=hashText(para.text);
+    if(shown.has(h)){ skipped++; continue; }
     for(let i=0;i<pairs.length;i++){
-
-      const re =
-        wordRegex(
-          pairs[i].orig
-        );
-
-      const match =
-        para.text.match(re);
-
-
-      if(match){
-
-        pool.push({
-
-          text:para.text,
-
-          matchWord:match[0],
-
-          pairIdx:i,
-
-          source:para.source,
-
-          hash:h
-
-        });
-
-        break;
-
-      }
-
+      const re=wordRegex(pairs[i].orig);
+      const m=para.text.match(re);
+      if(m){ pool.push({text:para.text, matchWord:m[0], pairIdx:i, source:para.source, hash:h}); break; }
     }
-
   }
-
-
-  $('loadstatus').textContent =
-    allParas.length +
-    ' paragrafi letti — ' +
-    pool.length +
-    ' nuovi disponibili' +
-    (
-      skipped
-        ? ' (' +
-          skipped +
-          ' già proposti in passato)'
-        : ''
-    ) +
-    '.';
-
-
+  $('loadstatus').textContent = allParas.length+' paragrafi letti — '+pool.length+' nuovi disponibili'+(skipped?' ('+skipped+' già proposti in passato)':'')+'.';
   updateFishState();
-
 }
-
-
-/* =========================================================
-   STATO PULSANTE PESCA
-   ========================================================= */
 
 function updateFishState(){
-
-  $('pesca').disabled =
-    pool.length === 0;
-
+  $('pesca').disabled = pool.length===0;
 }
 
-
-/* =========================================================
-   PESCA
-   ========================================================= */
-
-$('pesca').onclick = () => {
-
-  if(!pool.length){
-    return;
-  }
-
-
-  const idx =
-    Math.floor(
-      Math.random() *
-      pool.length
-    );
-
-
-  const item =
-    pool[idx];
-
-
-  current = {
-
-    text:item.text,
-
-    matchWord:item.matchWord,
-
-    pairIdx:item.pairIdx,
-
-    source:item.source,
-
-    substituted:false
-
-  };
-
-
+$('pesca').onclick=()=>{
+  const idx = Math.floor(Math.random()*pool.length);
+  const item = pool[idx];
+  current = {text:item.text, matchWord:item.matchWord, pairIdx:item.pairIdx, source:item.source, substituted:false};
   markShown(item.hash);
-
-
   pool.splice(idx,1);
-
-
   render();
-
-
-  $('sost').disabled = false;
-
-  $('salva').disabled = false;
-
-
+  $('sost').disabled=false;
+  $('salva').disabled=false;
   updateFishState();
-
-
-  if(pool.length === 0){
-
-    $('loadstatus').textContent =
-      'nessun altro paragrafo nuovo disponibile.';
-
-  }
-
+  if(pool.length===0) $('loadstatus').textContent='nessun altro paragrafo nuovo disponibile in questa sessione.';
 };
-
-
-/* =========================================================
-   RENDER FRASE
-   ========================================================= */
 
 function render(){
-
-  if(!current){
-    return;
-  }
-
-
-  const stage =
-    $('stage');
-
-
-  stage.classList.remove(
-    'empty'
-  );
-
-
-  let displayed;
-
-
-  if(current.substituted){
-
-    displayed =
-      current.text.replace(
-        wordRegex(
-          current.matchWord
-        ),
-        pairs[
-          current.pairIdx
-        ].sub
-      );
-
-  }else{
-
-    displayed =
-      current.text;
-
-  }
-
-
-  const highlightWord =
-    current.substituted
-      ? pairs[
-          current.pairIdx
-        ].sub
-      : current.matchWord;
-
-
-  const re =
-    wordRegex(
-      highlightWord
-    );
-
-
-  const html =
-    esc(displayed)
-      .replace(
-        re,
-        m =>
-          '<b>' +
-          m +
-          '</b>'
-      );
-
-
-  stage.innerHTML =
-    html;
-
+  const stage=$('stage');
+  stage.classList.remove('empty');
+  const re=wordRegex(current.substituted ? pairs[current.pairIdx].sub : current.matchWord);
+  const displayed = current.substituted
+    ? current.text.replace(wordRegex(current.matchWord), pairs[current.pairIdx].sub)
+    : current.text;
+  const html = esc(displayed).replace(re, m=>'<b>'+m+'</b>');
+  stage.innerHTML = html;
 }
 
-
-/* =========================================================
-   SOSTITUZIONE
-   ========================================================= */
-
-$('sost').onclick = () => {
-
-  if(
-    !current ||
-    current.substituted
-  ){
-
-    return;
-
-  }
-
-
-  current.substituted =
-    true;
-
-
+$('sost').onclick=()=>{
+  if(!current || current.substituted) return;
+  current.substituted=true;
   render();
-
 };
-
-
-/* =========================================================
-   FRASI SALVATE
-   ========================================================= */
 
 function loadSaved(){
-
   try{
-
-    const raw =
-      JSON.parse(
-        localStorage.getItem(
-          'pescafrasi_saved'
-        ) || '[]'
-      );
-
-
-    return raw.map(x =>
-      typeof x === 'string'
-        ? {
-            text:x,
-            source:'—'
-          }
-        : x
-    );
-
-  }catch(e){
-
-    return [];
-
-  }
-
+    const raw=JSON.parse(localStorage.getItem('pescafrasi_saved')||'[]');
+    return raw.map(x=> typeof x==='string' ? {text:x, source:'—'} : x);
+  }catch(e){ return []; }
 }
-
-
 function persistSaved(list){
-
-  try{
-
-    localStorage.setItem(
-      'pescafrasi_saved',
-      JSON.stringify(list)
-    );
-
-  }catch(e){}
-
+  try{ localStorage.setItem('pescafrasi_saved', JSON.stringify(list)); }catch(e){}
 }
-
-
 function renderSaved(){
-
-  const list =
-    loadSaved();
-
-
-  $('savedcount').textContent =
-    list.length;
-
-
-  $('savedlist').innerHTML =
-    list.map((s,i) =>
-
-      '<p>' +
-
-      esc(s.text) +
-
-      '<span class="src">' +
-
-      esc(s.source) +
-
-      '</span>' +
-
-      '<a class="rm" href="#" data-i="' +
-
-      i +
-
-      '">' +
-
-      'rimuovi' +
-
-      '</a>' +
-
-      '</p>'
-
-    ).join('');
-
+  const list=loadSaved();
+  $('savedcount').textContent=list.length;
+  $('savedlist').innerHTML = list.map((s,i)=>
+    '<p>'+esc(s.text)+'<span class="src">'+esc(s.source)+'</span><a class="rm" href="#" data-i="'+i+'">rimuovi</a></p>'
+  ).join('');
 }
-
-
-/* =========================================================
-   RIMOZIONE FRASE
-   ========================================================= */
-
-$('savedlist').addEventListener(
-  'click',
-  e => {
-
-    if(
-      e.target.classList.contains(
-        'rm'
-      )
-    ){
-
-      e.preventDefault();
-
-
-      const i =
-        +e.target.dataset.i;
-
-
-      const list =
-        loadSaved();
-
-
-      list.splice(i,1);
-
-
-      persistSaved(list);
-
-
-      renderSaved();
-
-    }
-
-  }
-);
-
-
-/* =========================================================
-   SALVA FRASE
-   ========================================================= */
-
-$('salva').onclick = () => {
-
-  if(!current){
-    return;
-  }
-
-
-  const finalText =
-    current.substituted
-
-      ? current.text.replace(
-          wordRegex(
-            current.matchWord
-          ),
-          pairs[
-            current.pairIdx
-          ].sub
-        )
-
-      : current.text;
-
-
-  const list =
-    loadSaved();
-
-
-  list.push({
-
-    text:finalText,
-
-    source:current.source
-
-  });
-
-
-  persistSaved(list);
-
-
-  renderSaved();
-
-};
-
-
-/* =========================================================
-   DOCX
-   ========================================================= */
-
-function docxPara(text, opts){
-
-  opts =
-    opts || {};
-
-
-  const spacing =
-    opts.spacing != null
-      ? opts.spacing
-      : 240;
-
-
-  let run =
-    '<w:r>' +
-    '<w:t xml:space="preserve">' +
-    xmlEsc(text) +
-    '</w:t>' +
-    '</w:r>';
-
-
-  if(opts.supNum != null){
-
-    run +=
-
-      '<w:r>' +
-
-      '<w:rPr>' +
-
-      '<w:vertAlign w:val="superscript"/>' +
-
-      '</w:rPr>' +
-
-      '<w:t>' +
-
-      opts.supNum +
-
-      '</w:t>' +
-
-      '</w:r>';
-
-  }
-
-
-  let rPr = '';
-
-
-  if(opts.bold){
-
-    rPr =
-      '<w:rPr>' +
-      '<w:b/>' +
-      '</w:rPr>';
-
-  }
-
-
-  if(opts.small){
-
-    rPr =
-      '<w:rPr>' +
-      '<w:sz w:val="18"/>' +
-      '</w:rPr>';
-
-  }
-
-
-  if(rPr){
-
-    run =
-      run.replace(
-        '<w:r>',
-        '<w:r>' + rPr
-      );
-
-  }
-
-
-  return (
-
-    '<w:p>' +
-
-    '<w:pPr>' +
-
-    '<w:spacing w:after="' +
-    spacing +
-    '"/>' +
-
-    '</w:pPr>' +
-
-    run +
-
-    '</w:p>'
-
-  );
-
-}
-
-
-async function buildDocx(list){
-
-  const body =
-    list
-      .map(
-        (s,i) =>
-          docxPara(
-            s.text,
-            {
-              supNum:i+1,
-              spacing:240
-            }
-          )
-      )
-      .join('');
-
-
-  const heading =
-    docxPara(
-      'Fonti',
-      {
-        bold:true,
-        spacing:160
-      }
-    );
-
-
-  const notes =
-    list
-      .map(
-        (s,i) =>
-          docxPara(
-            (i+1) +
-            '. ' +
-            s.source,
-            {
-              small:true,
-              spacing:60
-            }
-          )
-      )
-      .join('');
-
-
-  const documentXml =
-
-    '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
-
-    '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">' +
-
-    '<w:body>' +
-
-    body +
-
-    heading +
-
-    notes +
-
-    '<w:sectPr/>' +
-
-    '</w:body>' +
-
-    '</w:document>';
-
-
-  const contentTypes =
-
-    '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
-
-    '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">' +
-
-    '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>' +
-
-    '<Default Extension="xml" ContentType="application/xml"/>' +
-
-    '<Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>' +
-
-    '</Types>';
-
-
-  const rootRels =
-
-    '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
-
-    '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
-
-    '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>' +
-
-    '</Relationships>';
-
-
-  const zip =
-    new JSZip();
-
-
-  zip.file(
-    '[Content_Types].xml',
-    contentTypes
-  );
-
-
-  zip
-    .folder('_rels')
-    .file(
-      '.rels',
-      rootRels
-    );
-
-
-  zip
-    .folder('word')
-    .file(
-      'document.xml',
-      documentXml
-    );
-
-
-  return await zip.generateAsync({
-
-    type:'blob',
-
-    mimeType:
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-
-  });
-
-}
-
-
-/* =========================================================
-   ESPORTAZIONE DOCX
-   ========================================================= */
-
-$('exportbtn').onclick =
-  async () => {
-
-    const list =
-      loadSaved();
-
-
-    if(!list.length){
-      return;
-    }
-
-
-    $('exportbtn').disabled =
-      true;
-
-
-    const prevLabel =
-      $('exportbtn').textContent;
-
-
-    $('exportbtn').textContent =
-      'genero…';
-
-
-    try{
-
-      const blob =
-        await buildDocx(list);
-
-
-      const a =
-        document.createElement('a');
-
-
-      const url =
-        URL.createObjectURL(blob);
-
-
-      a.href = url;
-
-      a.download =
-        'pescafrasi.docx';
-
-
-      document.body.appendChild(a);
-
-      a.click();
-
-      a.remove();
-
-
-      setTimeout(
-        () =>
-          URL.revokeObjectURL(url),
-        1000
-      );
-
-
-    }catch(err){
-
-      console.error(err);
-
-      alert(
-        'Impossibile generare il documento.'
-      );
-
-    }finally{
-
-      $('exportbtn').disabled =
-        false;
-
-      $('exportbtn').textContent =
-        prevLabel;
-
-    }
-
-  };
-
-
-/* =========================================================
-   SVUOTA FRASI
-   ========================================================= */
-
-$('clearbtn').onclick = () => {
-
-  if(
-    confirm(
-      'Svuotare tutte le frasi salvate?'
-    )
-  ){
-
-    persistSaved([]);
-
+$('savedlist').addEventListener('click',e=>{
+  if(e.target.classList.contains('rm')){
+    e.preventDefault();
+    const i=+e.target.dataset.i;
+    const list=loadSaved();
+    list.splice(i,1);
+    persistSaved(list);
     renderSaved();
-
   }
-
+});
+$('salva').onclick=()=>{
+  if(!current) return;
+  const finalText = current.substituted
+    ? current.text.replace(wordRegex(current.matchWord), pairs[current.pairIdx].sub)
+    : current.text;
+  const list=loadSaved();
+  list.push({text:finalText, source:current.source});
+  persistSaved(list);
+  renderSaved();
 };
-
-
-/* =========================================================
-   AVVIO
-   ========================================================= */
+function xmlEsc(s){
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function docxPara(text, opts){
+  opts = opts || {};
+  const spacing = opts.spacing!=null ? opts.spacing : 240;
+  let run = '<w:r><w:t xml:space="preserve">'+xmlEsc(text)+'</w:t></w:r>';
+  if(opts.supNum!=null){
+    run += '<w:r><w:rPr><w:vertAlign w:val="superscript"/></w:rPr><w:t>'+opts.supNum+'</w:t></w:r>';
+  }
+  let rPr='';
+  if(opts.bold) rPr='<w:rPr><w:b/></w:rPr>';
+  if(opts.small) rPr='<w:rPr><w:sz w:val="18"/></w:rPr>';
+  if(rPr){ run = run.replace('<w:r>','<w:r>'+rPr); }
+  return '<w:p><w:pPr><w:spacing w:after="'+spacing+'"/></w:pPr>'+run+'</w:p>';
+}
+async function buildDocx(list){
+  const body = list.map((s,i)=> docxPara(s.text, {supNum:i+1, spacing:240})).join('');
+  const heading = docxPara('Fonti', {bold:true, spacing:160});
+  const notes = list.map((s,i)=> docxPara((i+1)+'. '+s.source, {small:true, spacing:60})).join('');
+  const documentXml =
+'<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
+'<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">'+
+'<w:body>'+body+heading+notes+'<w:sectPr/></w:body></w:document>';
+  const contentTypes =
+'<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
+'<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'+
+'<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>'+
+'<Default Extension="xml" ContentType="application/xml"/>'+
+'<Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>'+
+'</Types>';
+  const rootRels =
+'<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
+'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'+
+'<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>'+
+'</Relationships>';
+  const zip = new JSZip();
+  zip.file('[Content_Types].xml', contentTypes);
+  zip.folder('_rels').file('.rels', rootRels);
+  zip.folder('word').file('document.xml', documentXml);
+  return await zip.generateAsync({type:'blob', mimeType:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
+}
+$('exportbtn').onclick=async ()=>{
+  const list=loadSaved();
+  if(!list.length) return;
+  $('exportbtn').disabled=true;
+  const prevLabel=$('exportbtn').textContent;
+  $('exportbtn').textContent='genero…';
+  try{
+    const blob = await buildDocx(list);
+    let cap=null;
+    try{ cap = window.claude ? await window.claude.use('downloads') : null; }catch(e){ cap=null; }
+    if(cap){
+      try{
+        await cap.save({filename:'pescafrasi.docx', data:blob});
+      }catch(err){
+        const a=document.createElement('a');
+        a.href=URL.createObjectURL(blob); a.download='pescafrasi.docx'; a.click();
+      }
+    } else {
+      const a=document.createElement('a');
+      a.href=URL.createObjectURL(blob); a.download='pescafrasi.docx'; a.click();
+    }
+  } finally {
+    $('exportbtn').disabled=false;
+    $('exportbtn').textContent=prevLabel;
+  }
+};
+$('clearbtn').onclick=()=>{
+  if(confirm('Svuotare tutte le frasi salvate?')){
+    persistSaved([]);
+    renderSaved();
+  }
+};
 
 loadCfg();
-
 renderSaved();
-
-loadStoredEpubs();
-
+reloadLibrary();
 </script>
-
 </body>
 </html>
