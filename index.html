@@ -224,8 +224,7 @@ button.ghost{
 <section id="cfg">
 
   <label>
-    coppie parola-target → sostituto — una per riga,
-    formato "originale &gt; sostituto"
+    coppie parola-target → sostituto — una per riga, formato "originale &gt; sostituto"
   </label>
 
   <textarea
@@ -282,8 +281,7 @@ button.ghost{
 <section id="saved">
 
   <label>
-    frasi salvate
-    (<span id="savedcount">0</span>)
+    frasi salvate (<span id="savedcount">0</span>)
   </label>
 
   <div class="accum" id="savedlist"></div>
@@ -305,225 +303,42 @@ button.ghost{
 <script>
 
 /* =========================================================
-   ELEMENTI PRINCIPALI
+   RIFERIMENTI DOM
    ========================================================= */
 
 const $ = id => document.getElementById(id);
 
+
+/* =========================================================
+   STATO
+   ========================================================= */
+
 let pairs = [];
+
 let pool = [];
+
 let current = null;
+
 let allParas = [];
 
 
 /* =========================================================
-   INDEXEDDB
-   Gli EPUB vengono conservati nel browser anche dopo
-   la chiusura e riapertura dell'app.
+   UTILITY
    ========================================================= */
 
-const DB_NAME = 'pescafrasi_db';
-const DB_VERSION = 1;
-const STORE_EPUBS = 'epubs';
-
-
-function openDB(){
-
-  return new Promise((resolve,reject)=>{
-
-    const request = indexedDB.open(
-      DB_NAME,
-      DB_VERSION
-    );
-
-    request.onupgradeneeded = event => {
-
-      const db = event.target.result;
-
-      if(!db.objectStoreNames.contains(STORE_EPUBS)){
-
-        db.createObjectStore(
-          STORE_EPUBS,
-          {keyPath:'id'}
-        );
-
-      }
-    };
-
-    request.onsuccess = () => {
-
-      resolve(request.result);
-
-    };
-
-    request.onerror = () => {
-
-      reject(request.error);
-
-    };
-
-  });
-
+function esc(s){
+  return String(s)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;');
 }
 
 
-/*
-   Crea un identificatore del file.
-   Se lo stesso EPUB viene caricato due volte,
-   non viene duplicato nel database.
-*/
-
-async function makeFileId(file,buffer){
-
-  const data = new Uint8Array(buffer);
-
-  let hash = 0;
-
-  const step =
-    Math.max(
-      1,
-      Math.floor(data.length / 10000)
-    );
-
-  for(
-    let i = 0;
-    i < data.length;
-    i += step
-  ){
-
-    hash =
-      ((hash * 31) + data[i]) >>> 0;
-
-  }
-
-  return [
-    file.name,
-    file.size,
-    file.lastModified,
-    hash
-  ].join('|');
-
-}
-
-
-/*
-   Salva fisicamente l'EPUB in IndexedDB.
-*/
-
-async function saveEpub(file){
-
-  const buffer =
-    await file.arrayBuffer();
-
-  const id =
-    await makeFileId(
-      file,
-      buffer
-    );
-
-  const record = {
-
-    id:id,
-
-    name:file.name,
-
-    type:
-      file.type ||
-      'application/epub+zip',
-
-    size:file.size,
-
-    lastModified:
-      file.lastModified,
-
-    data:buffer
-
-  };
-
-  const db =
-    await openDB();
-
-  return new Promise((resolve,reject)=>{
-
-    const transaction =
-      db.transaction(
-        STORE_EPUBS,
-        'readwrite'
-      );
-
-    const store =
-      transaction.objectStore(
-        STORE_EPUBS
-      );
-
-    store.put(record);
-
-    transaction.oncomplete = () => {
-
-      db.close();
-
-      resolve(record);
-
-    };
-
-    transaction.onerror = () => {
-
-      db.close();
-
-      reject(transaction.error);
-
-    };
-
-  });
-
-}
-
-
-/*
-   Recupera tutti gli EPUB precedentemente salvati.
-*/
-
-async function getAllEpubs(){
-
-  const db =
-    await openDB();
-
-  return new Promise((resolve,reject)=>{
-
-    const transaction =
-      db.transaction(
-        STORE_EPUBS,
-        'readonly'
-      );
-
-    const store =
-      transaction.objectStore(
-        STORE_EPUBS
-      );
-
-    const request =
-      store.getAll();
-
-    request.onsuccess = () => {
-
-      db.close();
-
-      resolve(
-        request.result || []
-      );
-
-    };
-
-    request.onerror = () => {
-
-      db.close();
-
-      reject(request.error);
-
-    };
-
-  });
-
+function xmlEsc(s){
+  return String(s)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;');
 }
 
 
@@ -531,23 +346,12 @@ async function getAllEpubs(){
    CONFIGURAZIONE COPPIE
    ========================================================= */
 
-function esc(s){
-
-  return s
-    .replace(/&/g,'&amp;')
-    .replace(/</g,'&lt;');
-
-}
-
-
 function loadCfg(){
 
   try{
 
     const raw =
-      localStorage.getItem(
-        'pescafrasi_pairs'
-      );
+      localStorage.getItem('pescafrasi_pairs');
 
     if(raw){
 
@@ -565,33 +369,31 @@ function loadCfg(){
 function parsePairs(){
 
   const lines =
-    $('pairs')
-      .value
+    $('pairs').value
       .split('\n')
-      .map(l=>l.trim())
+      .map(l => l.trim())
       .filter(Boolean);
 
-  pairs =
-    lines
-      .map(l=>{
+  pairs = lines
+    .map(l => {
 
-        const [
-          original,
-          substitute
-        ] =
-          l
-            .split('>')
-            .map(x=>x.trim());
+      const parts =
+        l.split('>');
 
+      if(parts.length < 2){
         return {
-          orig:original,
-          sub:substitute
+          orig:'',
+          sub:''
         };
+      }
 
-      })
-      .filter(
-        p=>p.orig && p.sub
-      );
+      return {
+        orig:parts[0].trim(),
+        sub:parts.slice(1).join('>').trim()
+      };
+
+    })
+    .filter(p => p.orig && p.sub);
 
   updateFishState();
 
@@ -613,8 +415,7 @@ $('savecfg').onclick = () => {
 
   $('cfgstatus').textContent =
     pairs.length
-      ? pairs.length +
-        ' coppie attive'
+      ? pairs.length + ' coppie attive'
       : 'nessuna coppia valida';
 
   rebuildPool();
@@ -623,43 +424,36 @@ $('savecfg').onclick = () => {
 
 
 /* =========================================================
-   PAROLE
+   REGEX PAROLE
    ========================================================= */
 
 function wordRegex(word){
 
-  return new RegExp(
-
-    '(?<![A-Za-zÀ-ÿ])(' +
-
+  const escaped =
     word.replace(
       /[.*+?^${}()|[\]\\]/g,
       '\\$&'
-    ) +
+    );
 
+  return new RegExp(
+    '(?<![A-Za-zÀ-ÿ])(' +
+    escaped +
     ')(?![A-Za-zÀ-ÿ])',
-
     'i'
-
   );
 
 }
 
 
 /* =========================================================
-   HASH DELLE FRASI
-   Serve a non riproporre continuamente la stessa frase.
+   HASH
    ========================================================= */
 
 function hashText(s){
 
   let h = 5381;
 
-  for(
-    let i=0;
-    i<s.length;
-    i++
-  ){
+  for(let i=0;i<s.length;i++){
 
     h =
       ((h * 33) ^
@@ -672,20 +466,20 @@ function hashText(s){
 }
 
 
+/* =========================================================
+   FRASE GIÀ MOSTRATA
+   ========================================================= */
+
 function loadShown(){
 
   try{
 
     return new Set(
-
       JSON.parse(
-
         localStorage.getItem(
           'pescafrasi_shown'
         ) || '[]'
-
       )
-
     );
 
   }catch(e){
@@ -707,13 +501,8 @@ function markShown(hash){
   try{
 
     localStorage.setItem(
-
       'pescafrasi_shown',
-
-      JSON.stringify(
-        [...shown]
-      )
-
+      JSON.stringify([...shown])
     );
 
   }catch(e){}
@@ -722,8 +511,435 @@ function markShown(hash){
 
 
 /* =========================================================
-   LETTURA EPUB
+   INDEXED DB
    ========================================================= */
+
+const DB_NAME = 'pescafrasi_db';
+
+const DB_VERSION = 1;
+
+const STORE_NAME = 'epubs';
+
+
+function openDB(){
+
+  return new Promise((resolve,reject)=>{
+
+    const request =
+      indexedDB.open(
+        DB_NAME,
+        DB_VERSION
+      );
+
+    request.onupgradeneeded = () => {
+
+      const db = request.result;
+
+      if(!db.objectStoreNames.contains(STORE_NAME)){
+
+        db.createObjectStore(
+          STORE_NAME,
+          {
+            keyPath:'id'
+          }
+        );
+
+      }
+
+    };
+
+    request.onsuccess = () => {
+
+      resolve(request.result);
+
+    };
+
+    request.onerror = () => {
+
+      reject(request.error);
+
+    };
+
+  });
+
+}
+
+
+async function saveEpub(file){
+
+  const db = await openDB();
+
+  const buffer =
+    await file.arrayBuffer();
+
+  const id =
+    file.name + '_' +
+    buffer.byteLength;
+
+  return new Promise((resolve,reject)=>{
+
+    const tx =
+      db.transaction(
+        STORE_NAME,
+        'readwrite'
+      );
+
+    const store =
+      tx.objectStore(STORE_NAME);
+
+    store.put({
+
+      id:id,
+
+      name:file.name,
+
+      data:buffer
+
+    });
+
+    tx.oncomplete = () => {
+
+      resolve();
+
+    };
+
+    tx.onerror = () => {
+
+      reject(tx.error);
+
+    };
+
+  });
+
+}
+
+
+async function getAllEpubs(){
+
+  const db = await openDB();
+
+  return new Promise((resolve,reject)=>{
+
+    const tx =
+      db.transaction(
+        STORE_NAME,
+        'readonly'
+      );
+
+    const store =
+      tx.objectStore(STORE_NAME);
+
+    const request =
+      store.getAll();
+
+    request.onsuccess = () => {
+
+      resolve(request.result || []);
+
+    };
+
+    request.onerror = () => {
+
+      reject(request.error);
+
+    };
+
+  });
+
+}
+
+
+/* =========================================================
+   ESTRAZIONE TESTO EPUB
+   ========================================================= */
+
+/*
+  Gli EPUB non usano tutti la stessa struttura.
+
+  Alcuni hanno:
+
+      <p>...</p>
+
+  altri:
+
+      <div>...</div>
+
+  altri ancora:
+
+      <section>
+          <div>...</div>
+      </section>
+
+  e alcuni usano <br> per separare blocchi.
+
+  Il vecchio parser cercava esclusivamente <p>,
+  quindi con alcuni EPUB poteva finire per prendere
+  blocchi molto grandi, anche l'intera pagina.
+
+  Questa versione percorre ricorsivamente i blocchi
+  testuali e prende solamente i blocchi più interni.
+*/
+
+
+const BLOCK_TAGS = new Set([
+  'P',
+  'DIV',
+  'SECTION',
+  'ARTICLE',
+  'BLOCKQUOTE',
+  'LI',
+  'PRE'
+]);
+
+
+const IGNORE_TAGS = new Set([
+  'SCRIPT',
+  'STYLE',
+  'NOSCRIPT',
+  'NAV',
+  'HEADER',
+  'FOOTER',
+  'ASIDE',
+  'FIGURE',
+  'FIGCAPTION',
+  'SVG',
+  'IMG',
+  'AUDIO',
+  'VIDEO',
+  'CANVAS',
+  'TABLE',
+  'FORM'
+]);
+
+
+function cleanText(text){
+
+  return String(text)
+    .replace(/\u00A0/g,' ')
+    .replace(/\r/g,'')
+    .replace(/[ \t]+/g,' ')
+    .replace(/[ \t]*\n[ \t]*/g,'\n')
+    .trim();
+
+}
+
+
+/*
+  Restituisce il testo di un blocco mantenendo
+  temporaneamente i <br> come ritorni a capo.
+*/
+
+function textWithBreaks(element){
+
+  const clone =
+    element.cloneNode(true);
+
+  clone
+    .querySelectorAll('br')
+    .forEach(br => {
+
+      br.replaceWith(
+        document.createTextNode('\n')
+      );
+
+    });
+
+  return clone.textContent || '';
+
+}
+
+
+/*
+  Controlla se un elemento contiene altri elementi
+  che rappresentano blocchi testuali.
+
+  Se li contiene, l'elemento è un contenitore,
+  non il paragrafo vero e proprio.
+*/
+
+function hasMeaningfulBlockChild(element){
+
+  return [...element.children].some(
+    child =>
+      BLOCK_TAGS.has(child.tagName) &&
+      !IGNORE_TAGS.has(child.tagName)
+  );
+
+}
+
+
+/*
+  Aggiunge uno o più paragrafi all'array.
+
+  In presenza di più righe separate da <br>,
+  prova a distinguere i blocchi.
+
+  Se c'è una sola riga lunga, la considera un
+  singolo paragrafo.
+*/
+
+function addTextBlock(raw, output, source){
+
+  if(!raw) return;
+
+  const normalized =
+    raw
+      .replace(/\u00A0/g,' ')
+      .replace(/\r/g,'');
+
+  const doubleBreak =
+    normalized
+      .split(/\n\s*\n+/)
+      .map(x => cleanText(x))
+      .filter(x => x.length > 15);
+
+  if(doubleBreak.length > 1){
+
+    doubleBreak.forEach(text => {
+
+      output.push({
+        text:text,
+        source:source
+      });
+
+    });
+
+    return;
+
+  }
+
+
+  const lines =
+    normalized
+      .split(/\n+/)
+      .map(x => cleanText(x))
+      .filter(x => x.length > 0);
+
+
+  /*
+    Se ci sono diverse righe abbastanza lunghe,
+    le trattiamo come blocchi separati.
+
+    Questo serve soprattutto per EPUB che usano
+    <br> al posto di <p>.
+  */
+
+  const longLines =
+    lines.filter(x => x.length > 15);
+
+
+  if(longLines.length >= 2){
+
+    longLines.forEach(text => {
+
+      if(text.length > 15){
+
+        output.push({
+          text:text,
+          source:source
+        });
+
+      }
+
+    });
+
+    return;
+
+  }
+
+
+  const text =
+    cleanText(
+      normalized.replace(/\n+/g,' ')
+    );
+
+
+  if(text.length > 15){
+
+    output.push({
+      text:text,
+      source:source
+    });
+
+  }
+
+}
+
+
+/*
+  Percorre il documento.
+
+  Se trova un contenitore con altri blocchi,
+  scende di livello.
+
+  Se trova un blocco senza altri blocchi,
+  quello è il candidato paragrafo.
+*/
+
+function collectTextBlocks(root, output, source){
+
+  for(const child of [...root.children]){
+
+    const tag =
+      child.tagName
+        ? child.tagName.toUpperCase()
+        : '';
+
+    if(IGNORE_TAGS.has(tag)){
+      continue;
+    }
+
+
+    if(BLOCK_TAGS.has(tag)){
+
+      if(hasMeaningfulBlockChild(child)){
+
+        collectTextBlocks(
+          child,
+          output,
+          source
+        );
+
+      }else{
+
+        const raw =
+          textWithBreaks(child);
+
+        addTextBlock(
+          raw,
+          output,
+          source
+        );
+
+      }
+
+    }else{
+
+      /*
+        Contenitori come <body>, <main>,
+        <html> ecc.
+      */
+
+      if(child.children.length){
+
+        collectTextBlocks(
+          child,
+          output,
+          source
+        );
+
+      }
+
+    }
+
+  }
+
+}
+
+
+/*
+  Legge un singolo file EPUB.
+*/
 
 async function readEpub(file){
 
@@ -734,19 +950,24 @@ async function readEpub(file){
 
   const names =
     Object.keys(zip.files)
-      .filter(
-        n=>/\.(xhtml|html|htm)$/i.test(n)
+      .filter(name =>
+        /\.(xhtml|html|htm)$/i.test(name)
       );
 
-  for(
-    const name of names
-  ){
+
+  for(const name of names){
 
     const raw =
       await zip.files[name]
         .async('string');
 
-    let doc;
+
+    let doc = null;
+
+
+    /*
+      Prima proviamo XHTML/XML.
+    */
 
     try{
 
@@ -763,6 +984,12 @@ async function readEpub(file){
 
     }
 
+
+    /*
+      Se il parser XML ha prodotto un errore,
+      usiamo HTML.
+    */
+
     if(
       !doc ||
       doc.querySelector('parsererror')
@@ -777,30 +1004,20 @@ async function readEpub(file){
 
     }
 
-    doc
-      .querySelectorAll('p')
-      .forEach(p=>{
 
-        const text =
-          p.textContent
-            .replace(/\s+/g,' ')
-            .trim();
+    if(!doc || !doc.body){
+      continue;
+    }
 
-        if(text.length > 15){
 
-          paras.push({
-
-            text:text,
-
-            source:file.name
-
-          });
-
-        }
-
-      });
+    collectTextBlocks(
+      doc.body,
+      paras,
+      file.name
+    );
 
   }
+
 
   return paras;
 
@@ -808,60 +1025,41 @@ async function readEpub(file){
 
 
 /* =========================================================
-   RECUPERA EPUB SALVATI ALL'APERTURA
+   CARICAMENTO EPUB
    ========================================================= */
 
 async function loadStoredEpubs(){
 
   try{
 
-    $('loadstatus').textContent =
-      'recupero EPUB salvati…';
-
     const records =
       await getAllEpubs();
 
     allParas = [];
 
-    for(
-      const record of records
-    ){
+    for(const record of records){
 
       try{
 
         const file =
           new File(
-
             [record.data],
-
             record.name,
-
             {
-
-              type:
-                record.type ||
-                'application/epub+zip',
-
-              lastModified:
-                record.lastModified ||
-                Date.now()
-
+              type:'application/epub+zip'
             }
-
           );
 
         const paras =
           await readEpub(file);
 
         allParas =
-          allParas.concat(
-            paras
-          );
+          allParas.concat(paras);
 
       }catch(err){
 
         console.error(
-          'Errore nella lettura dell’EPUB:',
+          'Errore nella lettura di',
           record.name,
           err
         );
@@ -870,20 +1068,17 @@ async function loadStoredEpubs(){
 
     }
 
+
     if(records.length){
 
       $('loadstatus').textContent =
         allParas.length +
-        ' paragrafi recuperati da ' +
+        ' paragrafi letti da ' +
         records.length +
         ' EPUB salvati.';
 
-    }else{
-
-      $('loadstatus').textContent =
-        'nessun EPUB salvato.';
-
     }
+
 
     rebuildPool();
 
@@ -891,75 +1086,68 @@ async function loadStoredEpubs(){
 
     console.error(err);
 
-    $('loadstatus').textContent =
-      'impossibile recuperare gli EPUB salvati.';
-
   }
 
 }
 
 
 /* =========================================================
-   CARICAMENTO NUOVI EPUB
+   UPLOAD EPUB
    ========================================================= */
 
-$('epubs').onchange =
-  async event => {
+$('epubs').onchange = async e => {
 
-    const files =
-      [...event.target.files];
+  const files =
+    [...e.target.files];
 
-    if(!files.length) return;
+  if(!files.length){
+    return;
+  }
 
-    $('loadstatus').textContent =
-      'salvataggio degli EPUB…';
 
-    try{
+  $('loadstatus').textContent =
+    'lettura in corso…';
 
-      /*
-         Prima salviamo i file.
-      */
 
-      for(
-        const file of files
-      ){
+  try{
 
-        await saveEpub(file);
+    /*
+      Salviamo gli EPUB in IndexedDB.
+    */
 
-      }
+    for(const file of files){
 
-      /*
-         Poi rileggiamo tutto
-         dal database.
-      */
-
-      await loadStoredEpubs();
-
-      $('loadstatus').textContent =
-        allParas.length +
-        ' paragrafi letti. EPUB salvati automaticamente.';
-
-    }catch(err){
-
-      console.error(err);
-
-      $('loadstatus').textContent =
-        'errore nel salvataggio o nella lettura degli EPUB.';
+      await saveEpub(file);
 
     }
 
+
     /*
-       Permette di scegliere nuovamente
-       lo stesso file.
+      Rileggiamo tutti gli EPUB presenti,
+      compresi quelli già salvati.
     */
 
-    event.target.value = '';
+    await loadStoredEpubs();
 
-  };
+
+    $('loadstatus').textContent =
+      allParas.length +
+      ' paragrafi disponibili da EPUB salvati.';
+
+  }catch(err){
+
+    console.error(err);
+
+    $('loadstatus').textContent =
+      'errore nella lettura degli EPUB.';
+
+  }
+
+};
 
 
 /* =========================================================
-   COSTRUZIONE DEL POOL
+   COSTRUZIONE POOL
    ========================================================= */
 
 function rebuildPool(){
@@ -977,18 +1165,17 @@ function rebuildPool(){
 
   }
 
+
   let skipped = 0;
 
-  for(
-    const para of allParas
-  ){
 
-    const hash =
-      hashText(
-        para.text
-      );
+  for(const para of allParas){
 
-    if(shown.has(hash)){
+    const h =
+      hashText(para.text);
+
+
+    if(shown.has(h)){
 
       skipped++;
 
@@ -996,19 +1183,17 @@ function rebuildPool(){
 
     }
 
-    for(
-      let i=0;
-      i<pairs.length;
-      i++
-    ){
 
-      const regex =
+    for(let i=0;i<pairs.length;i++){
+
+      const re =
         wordRegex(
           pairs[i].orig
         );
 
       const match =
-        para.text.match(regex);
+        para.text.match(re);
+
 
       if(match){
 
@@ -1022,7 +1207,7 @@ function rebuildPool(){
 
           source:para.source,
 
-          hash:hash
+          hash:h
 
         });
 
@@ -1033,6 +1218,7 @@ function rebuildPool(){
     }
 
   }
+
 
   $('loadstatus').textContent =
     allParas.length +
@@ -1048,10 +1234,15 @@ function rebuildPool(){
     ) +
     '.';
 
+
   updateFishState();
 
 }
 
+
+/* =========================================================
+   STATO PULSANTE PESCA
+   ========================================================= */
 
 function updateFishState(){
 
@@ -1067,16 +1258,21 @@ function updateFishState(){
 
 $('pesca').onclick = () => {
 
-  if(!pool.length) return;
+  if(!pool.length){
+    return;
+  }
 
-  const index =
+
+  const idx =
     Math.floor(
       Math.random() *
       pool.length
     );
 
+
   const item =
-    pool[index];
+    pool[idx];
+
 
   current = {
 
@@ -1092,24 +1288,25 @@ $('pesca').onclick = () => {
 
   };
 
-  markShown(
-    item.hash
-  );
 
-  pool.splice(
-    index,
-    1
-  );
+  markShown(item.hash);
+
+
+  pool.splice(idx,1);
+
 
   render();
+
 
   $('sost').disabled = false;
 
   $('salva').disabled = false;
 
+
   updateFishState();
 
-  if(!pool.length){
+
+  if(pool.length === 0){
 
     $('loadstatus').textContent =
       'nessun altro paragrafo nuovo disponibile.';
@@ -1125,58 +1322,67 @@ $('pesca').onclick = () => {
 
 function render(){
 
+  if(!current){
+    return;
+  }
+
+
   const stage =
     $('stage');
+
 
   stage.classList.remove(
     'empty'
   );
 
-  const displayed =
+
+  let displayed;
+
+
+  if(current.substituted){
+
+    displayed =
+      current.text.replace(
+        wordRegex(
+          current.matchWord
+        ),
+        pairs[
+          current.pairIdx
+        ].sub
+      );
+
+  }else{
+
+    displayed =
+      current.text;
+
+  }
+
+
+  const highlightWord =
     current.substituted
-
-      ? current.text.replace(
-
-          wordRegex(
-            current.matchWord
-          ),
-
-          pairs[
-            current.pairIdx
-          ].sub
-
-        )
-
-      : current.text;
-
-  /*
-     Se abbiamo sostituito la parola,
-     evidenziamo la nuova parola.
-  */
-
-  const wordToHighlight =
-    current.substituted
-
       ? pairs[
           current.pairIdx
         ].sub
-
       : current.matchWord;
 
-  const regex =
+
+  const re =
     wordRegex(
-      wordToHighlight
+      highlightWord
     );
+
 
   const html =
     esc(displayed)
       .replace(
-        regex,
-        match =>
+        re,
+        m =>
           '<b>' +
-          match +
+          m +
           '</b>'
       );
+
 
   stage.innerHTML =
     html;
@@ -1199,8 +1405,10 @@ $('sost').onclick = () => {
 
   }
 
+
   current.substituted =
     true;
+
 
   render();
 
@@ -1217,25 +1425,19 @@ function loadSaved(){
 
     const raw =
       JSON.parse(
-
         localStorage.getItem(
           'pescafrasi_saved'
         ) || '[]'
-
       );
 
-    return raw.map(
-      item =>
 
-        typeof item === 'string'
-
-          ? {
-              text:item,
-              source:'—'
-            }
-
-          : item
-
+    return raw.map(x =>
+      typeof x === 'string'
+        ? {
+            text:x,
+            source:'—'
+          }
+        : x
     );
 
   }catch(e){
@@ -1252,11 +1454,8 @@ function persistSaved(list){
   try{
 
     localStorage.setItem(
-
       'pescafrasi_saved',
-
       JSON.stringify(list)
-
     );
 
   }catch(e){}
@@ -1269,68 +1468,71 @@ function renderSaved(){
   const list =
     loadSaved();
 
+
   $('savedcount').textContent =
     list.length;
 
+
   $('savedlist').innerHTML =
-    list
-      .map(
-        (item,index) =>
+    list.map((s,i) =>
 
-          '<p>' +
+      '<p>' +
 
-          esc(item.text) +
+      esc(s.text) +
 
-          '<span class="src">' +
+      '<span class="src">' +
 
-          esc(item.source) +
+      esc(s.source) +
 
-          '</span>' +
+      '</span>' +
 
-          '<a class="rm" href="#" data-i="' +
+      '<a class="rm" href="#" data-i="' +
 
-          index +
+      i +
 
-          '">' +
+      '">' +
 
-          'rimuovi' +
+      'rimuovi' +
 
-          '</a>' +
+      '</a>' +
 
-          '</p>'
+      '</p>'
 
-      )
-      .join('');
+    ).join('');
 
 }
 
 
+/* =========================================================
+   RIMOZIONE FRASE
+   ========================================================= */
+
 $('savedlist').addEventListener(
   'click',
-  event => {
+  e => {
 
     if(
-      event.target.classList.contains(
+      e.target.classList.contains(
         'rm'
       )
     ){
 
-      event.preventDefault();
+      e.preventDefault();
 
-      const index =
-        +event.target.dataset.i;
+
+      const i =
+        +e.target.dataset.i;
+
 
       const list =
         loadSaved();
 
-      list.splice(
-        index,
-        1
-      );
 
-      persistSaved(
-        list
-      );
+      list.splice(i,1);
+
+
+      persistSaved(list);
+
 
       renderSaved();
 
@@ -1346,27 +1548,29 @@ $('savedlist').addEventListener(
 
 $('salva').onclick = () => {
 
-  if(!current) return;
+  if(!current){
+    return;
+  }
+
 
   const finalText =
     current.substituted
 
       ? current.text.replace(
-
           wordRegex(
             current.matchWord
           ),
-
           pairs[
             current.pairIdx
           ].sub
-
         )
 
       : current.text;
 
+
   const list =
     loadSaved();
+
 
   list.push({
 
@@ -1376,9 +1580,9 @@ $('salva').onclick = () => {
 
   });
 
-  persistSaved(
-    list
-  );
+
+  persistSaved(list);
+
 
   renderSaved();
 
@@ -1386,50 +1590,20 @@ $('salva').onclick = () => {
 
 
 /* =========================================================
-   ESPORTAZIONE DOCX
+   DOCX
    ========================================================= */
 
-function xmlEsc(s){
+function docxPara(text, opts){
 
-  return s
+  opts =
+    opts || {};
 
-    .replace(
-      /&/g,
-      '&amp;'
-    )
-
-    .replace(
-      /</g,
-      '&lt;'
-    )
-
-    .replace(
-      />/g,
-      '&gt;'
-    )
-
-    .replace(
-      /"/g,
-      '&quot;'
-    );
-
-}
-
-
-function docxPara(
-  text,
-  options
-){
-
-  options =
-    options || {};
 
   const spacing =
-    options.spacing != null
-
-      ? options.spacing
-
+    opts.spacing != null
+      ? opts.spacing
       : 240;
+
 
   let run =
     '<w:r>' +
@@ -1438,9 +1612,8 @@ function docxPara(
     '</w:t>' +
     '</w:r>';
 
-  if(
-    options.supNum != null
-  ){
+
+  if(opts.supNum != null){
 
     run +=
 
@@ -1454,7 +1627,7 @@ function docxPara(
 
       '<w:t>' +
 
-      options.supNum +
+      opts.supNum +
 
       '</w:t>' +
 
@@ -1462,34 +1635,42 @@ function docxPara(
 
   }
 
+
   let rPr = '';
 
-  if(options.bold){
+
+  if(opts.bold){
 
     rPr =
-      '<w:rPr><w:b/></w:rPr>';
+      '<w:rPr>' +
+      '<w:b/>' +
+      '</w:rPr>';
 
   }
 
-  if(options.small){
+
+  if(opts.small){
 
     rPr =
-      '<w:rPr><w:sz w:val="18"/></w:rPr>';
+      '<w:rPr>' +
+      '<w:sz w:val="18"/>' +
+      '</w:rPr>';
 
   }
+
 
   if(rPr){
 
     run =
       run.replace(
         '<w:r>',
-        '<w:r>' +
-        rPr
+        '<w:r>' + rPr
       );
 
   }
 
-  return
+
+  return (
 
     '<w:p>' +
 
@@ -1503,7 +1684,9 @@ function docxPara(
 
     run +
 
-    '</w:p>';
+    '</w:p>'
+
+  );
 
 }
 
@@ -1513,54 +1696,44 @@ async function buildDocx(list){
   const body =
     list
       .map(
-        (item,index) =>
-
+        (s,i) =>
           docxPara(
-
-            item.text,
-
+            s.text,
             {
-              supNum:index+1,
+              supNum:i+1,
               spacing:240
             }
-
           )
-
       )
       .join('');
 
+
   const heading =
     docxPara(
-
       'Fonti',
-
       {
         bold:true,
         spacing:160
       }
-
     );
+
 
   const notes =
     list
       .map(
-        (item,index) =>
-
+        (s,i) =>
           docxPara(
-
-            (index+1) +
+            (i+1) +
             '. ' +
-            item.source,
-
+            s.source,
             {
               small:true,
               spacing:60
             }
-
           )
-
       )
       .join('');
+
 
   const documentXml =
 
@@ -1582,6 +1755,7 @@ async function buildDocx(list){
 
     '</w:document>';
 
+
   const contentTypes =
 
     '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
@@ -1596,6 +1770,7 @@ async function buildDocx(list){
 
     '</Types>';
 
+
   const rootRels =
 
     '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
@@ -1606,13 +1781,16 @@ async function buildDocx(list){
 
     '</Relationships>';
 
+
   const zip =
     new JSZip();
+
 
   zip.file(
     '[Content_Types].xml',
     contentTypes
   );
+
 
   zip
     .folder('_rels')
@@ -1621,12 +1799,14 @@ async function buildDocx(list){
       rootRels
     );
 
+
   zip
     .folder('word')
     .file(
       'document.xml',
       documentXml
     );
+
 
   return await zip.generateAsync({
 
@@ -1640,57 +1820,74 @@ async function buildDocx(list){
 }
 
 
+/* =========================================================
+   ESPORTAZIONE DOCX
+   ========================================================= */
+
 $('exportbtn').onclick =
   async () => {
 
     const list =
       loadSaved();
 
-    if(!list.length) return;
+
+    if(!list.length){
+      return;
+    }
+
 
     $('exportbtn').disabled =
       true;
 
-    const previousLabel =
+
+    const prevLabel =
       $('exportbtn').textContent;
+
 
     $('exportbtn').textContent =
       'genero…';
 
+
     try{
 
       const blob =
-        await buildDocx(
-          list
-        );
+        await buildDocx(list);
 
-      const link =
+
+      const a =
         document.createElement('a');
 
+
       const url =
-        URL.createObjectURL(
-          blob
-        );
+        URL.createObjectURL(blob);
 
-      link.href = url;
 
-      link.download =
+      a.href = url;
+
+      a.download =
         'pescafrasi.docx';
 
-      document.body.appendChild(
-        link
-      );
 
-      link.click();
+      document.body.appendChild(a);
 
-      link.remove();
+      a.click();
+
+      a.remove();
+
 
       setTimeout(
         () =>
-          URL.revokeObjectURL(
-            url
-          ),
+          URL.revokeObjectURL(url),
         1000
+      );
+
+
+    }catch(err){
+
+      console.error(err);
+
+      alert(
+        'Impossibile generare il documento.'
       );
 
     }finally{
@@ -1699,7 +1896,7 @@ $('exportbtn').onclick =
         false;
 
       $('exportbtn').textContent =
-        previousLabel;
+        prevLabel;
 
     }
 
@@ -1728,18 +1925,12 @@ $('clearbtn').onclick = () => {
 
 
 /* =========================================================
-   AVVIO DELL'APP
+   AVVIO
    ========================================================= */
 
 loadCfg();
 
 renderSaved();
-
-/*
-   Questa è la parte fondamentale:
-   quando riapri l'app, gli EPUB vengono
-   recuperati automaticamente da IndexedDB.
-*/
 
 loadStoredEpubs();
 
