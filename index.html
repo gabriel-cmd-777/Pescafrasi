@@ -3,42 +3,63 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>pescafrasi</title>
+<title>Pescafrasi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <style>
 :root{
-  --paper:#efece3; --ink:#1d1b17; --rule:#c9c3b3; --pencil:#a13d2f; --dim:#7c7666;
+  --paper:#f3ede0; --paper2:#eae2d0; --ink:#241f18; --rule:#cdbfa0; --pencil:#a13d2f; --pencil2:#7a8c6f; --dim:#8a7f68;
   padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
 }
 @media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){--paper:#17160f; --ink:#e8e4d8; --rule:#3a3628; --pencil:#e08a72; --dim:#8e8874;}
+  :root:not([data-theme="light"]){--paper:#161410; --paper2:#1e1b15; --ink:#ece5d4; --rule:#413a2c; --pencil:#e2896e; --pencil2:#9fb391; --dim:#948a70;}
 }
-:root[data-theme="dark"]{--paper:#17160f; --ink:#e8e4d8; --rule:#3a3628; --pencil:#e08a72; --dim:#8e8874;}
+:root[data-theme="dark"]{--paper:#161410; --paper2:#1e1b15; --ink:#ece5d4; --rule:#413a2c; --pencil:#e2896e; --pencil2:#9fb391; --dim:#948a70;}
 *{box-sizing:border-box;}
 html,body{margin:0;background:var(--paper);color:var(--ink);}
-body{font-family:Georgia,"Iowan Old Style",serif;line-height:1.5;padding:2rem 1.25rem 4rem;max-width:640px;margin:0 auto;}
-h1{font-size:1.05rem;font-weight:400;font-style:italic;letter-spacing:.02em;margin:0 0 .25rem;}
-.sub{font-family:ui-monospace,Menlo,monospace;font-size:.72rem;color:var(--dim);margin:0 0 2rem;}
-section{border-top:1px solid var(--rule);padding:1.1rem 0;}
+body{
+  font-family:"Cormorant Garamond",Georgia,serif;line-height:1.55;
+  padding:2.5rem 1.4rem 4rem;max-width:640px;margin:0 auto;
+  background-image:radial-gradient(ellipse at top,var(--paper2) 0%,var(--paper) 60%);
+}
+h1{font-size:2rem;font-weight:600;letter-spacing:.01em;margin:0;display:flex;align-items:baseline;gap:.5rem;}
+h1 .rod{font-size:1.1rem;}
+.sub{font-family:"JetBrains Mono",ui-monospace,monospace;font-size:.68rem;letter-spacing:.03em;text-transform:uppercase;color:var(--dim);margin:.4rem 0 2.2rem;}
+section{border-top:1px dashed var(--rule);padding:1.3rem 0;}
 section:first-of-type{border-top:none;}
-label{display:block;font-family:ui-monospace,Menlo,monospace;font-size:.7rem;color:var(--dim);margin-bottom:.4rem;}
-textarea,input[type=text]{width:100%;font-family:ui-monospace,Menlo,monospace;font-size:.82rem;background:transparent;color:var(--ink);border:1px solid var(--rule);padding:.5rem .6rem;border-radius:2px;}
+label{display:block;font-family:"JetBrains Mono",ui-monospace,monospace;font-size:.68rem;letter-spacing:.02em;color:var(--dim);margin-bottom:.5rem;}
+textarea,input[type=text]{width:100%;font-family:"JetBrains Mono",ui-monospace,monospace;font-size:.82rem;background:var(--paper2);color:var(--ink);border:1px solid var(--rule);padding:.6rem .7rem;border-radius:6px;}
 textarea{min-height:4.5rem;resize:vertical;}
-input[type=file]{font-family:ui-monospace,Menlo,monospace;font-size:.75rem;color:var(--dim);width:100%;}
-button{font-family:ui-monospace,Menlo,monospace;font-size:.75rem;background:transparent;color:var(--ink);border:1px solid var(--ink);padding:.5rem .85rem;border-radius:2px;cursor:pointer;margin:.3rem .5rem .3rem 0;}
-button:hover{background:var(--ink);color:var(--paper);}
-button:disabled{opacity:.3;cursor:default;background:transparent;color:var(--ink);}
-button.ghost{border-color:var(--rule);color:var(--dim);}
-.status{font-family:ui-monospace,Menlo,monospace;font-size:.7rem;color:var(--dim);margin:.6rem 0;min-height:1em;}
-.stage{font-size:1.15rem;padding:1rem 0;min-height:3em;}
-.stage b{color:var(--pencil);font-weight:400;font-style:italic;border-bottom:1px solid var(--pencil);}
-.stage.empty{color:var(--dim);font-style:italic;font-size:.9rem;}
-.accum{font-size:.98rem;margin:.5rem 0 0;}
-.accum p{position:relative;margin:0 0 1.6em;padding-right:1.4em;}
-.accum p .rm{position:absolute;right:0;top:.15em;font-family:ui-monospace,Menlo,monospace;font-size:.65rem;color:var(--dim);text-decoration:none;opacity:.5;}
-.accum p .rm:hover{opacity:1;}
-.accum p .src{display:block;font-family:ui-monospace,Menlo,monospace;font-size:.65rem;color:var(--dim);margin-top:.25em;}
-#library p{margin:0 0 .3em;padding-right:1.4em;}
+input[type=file]{font-family:"JetBrains Mono",ui-monospace,monospace;font-size:.75rem;color:var(--dim);width:100%;}
+button{
+  font-family:"JetBrains Mono",ui-monospace,monospace;font-size:.7rem;letter-spacing:.04em;text-transform:uppercase;
+  background:var(--paper2);color:var(--ink);border:1px solid var(--ink);
+  padding:.55rem 1rem;border-radius:999px;cursor:pointer;margin:.3rem .5rem .3rem 0;
+  transition:background .15s ease,color .15s ease,transform .1s ease;
+}
+button:hover:not(:disabled){background:var(--ink);color:var(--paper);}
+button:active:not(:disabled){transform:scale(.96);}
+button:disabled{opacity:.3;cursor:default;}
+button.ghost{border-color:var(--rule);color:var(--dim);background:transparent;}
+.status{font-family:"JetBrains Mono",ui-monospace,monospace;font-size:.68rem;color:var(--dim);margin:.7rem 0;min-height:1em;}
+.stage{
+  font-size:1.35rem;padding:1.4rem 1.5rem;margin-top:.8rem;min-height:3em;
+  background:var(--paper2);border:1px solid var(--rule);border-left:4px solid var(--pencil);
+  border-radius:4px 10px 10px 4px;box-shadow:0 6px 18px -12px rgba(0,0,0,.35);
+}
+.stage b{color:var(--pencil);font-weight:600;font-style:normal;}
+.stage.empty{color:var(--dim);font-style:italic;font-size:1rem;border-left-color:var(--rule);box-shadow:none;}
+@keyframes fadein{from{opacity:0;transform:translateY(3px);}to{opacity:1;transform:translateY(0);}}
+.stage.fadein{animation:fadein .35s ease;}
+.accum{font-size:1.08rem;margin:.5rem 0 0;}
+.accum p{position:relative;margin:0 0 1.7em;padding:.1em 1.4em .1em .9em;border-left:2px solid var(--rule);}
+.accum p b{color:var(--pencil);font-weight:600;}
+.accum p .rm{position:absolute;right:0;top:.15em;font-family:"JetBrains Mono",ui-monospace,monospace;font-size:.62rem;color:var(--dim);text-decoration:none;opacity:.4;}
+.accum p .rm:hover{opacity:1;color:var(--pencil);}
+.accum p .src{display:block;font-family:"JetBrains Mono",ui-monospace,monospace;font-size:.62rem;color:var(--dim);margin-top:.35em;}
+#library{border-left:none;}
+#library p{margin:0 0 .3em;padding:0 1.4em 0 0;border-left:none;}
 #library .rm{opacity:.6;}
 .rowflex{display:flex;gap:.5rem;align-items:flex-start;flex-wrap:wrap;}
 .count{color:var(--dim);}
@@ -46,8 +67,8 @@ button.ghost{border-color:var(--rule);color:var(--dim);}
 </head>
 <body>
 
-<h1>pescafrasi</h1>
-<p class="sub">estrae frasi da EPUB, sostituzione seriale parola&nbsp;→&nbsp;parola</p>
+<h1><span class="rod">🎣</span> Pescafrasi</h1>
+<p class="sub">estrazione &amp; sostituzione seriale da EPUB</p>
 
 <section id="cfg">
   <label>coppie parola-target → sostituto — una per riga, formato "originale &gt; sostituto"</label>
@@ -114,6 +135,36 @@ $('savecfg').onclick=()=>{
 
 function wordRegex(word){
   return new RegExp('(?<![A-Za-zÀ-ÿ])('+word.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')(?![A-Za-zÀ-ÿ])','i');
+}
+function wordRegexG(word){
+  return new RegExp('(?<![A-Za-zÀ-ÿ])('+word.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')(?![A-Za-zÀ-ÿ])','gi');
+}
+function tokenize(text){
+  const words=[]; const re=/\S+/g; let m;
+  while((m=re.exec(text))) words.push({start:m.index, end:m.index+m[0].length});
+  return words;
+}
+// Ritaglia il testo a una finestra di massimo ~100 parole attorno alla parola trovata,
+// garantendo che quella parola non sia mai l'ultima della finestra (né dell'estratto)
+function buildWindow(text, words, matchIndex){
+  let wi=-1;
+  for(let k=0;k<words.length;k++){ if(matchIndex>=words[k].start && matchIndex<words[k].end){ wi=k; break; } }
+  if(wi===-1) return null;
+  const availAfter = words.length-1-wi;
+  if(availAfter<1) return null; // la parola sarebbe l'ultima: scartata
+  const TOTAL=100;
+  let after = Math.min(availAfter, Math.max(3, Math.round(TOTAL*0.35)));
+  let before = Math.min(wi, Math.max(0, TOTAL-1-after));
+  let used = before+1+after;
+  if(used<TOTAL){
+    const extra = Math.min(TOTAL-used, words.length-1-(wi+after));
+    after += extra;
+  }
+  const startIdx=wi-before, endIdx=wi+after;
+  let snippet = text.slice(words[startIdx].start, words[endIdx].end);
+  if(startIdx>0) snippet='…'+snippet;
+  if(endIdx<words.length-1) snippet=snippet+'…';
+  return snippet;
 }
 
 function hashText(s){
@@ -249,15 +300,20 @@ function rebuildPool(){
   if(!pairs.length || !allParas.length){ updateFishState(); return; }
   let skipped=0;
   for(const para of allParas){
-    const h=hashText(para.text);
-    if(shown.has(h)){ skipped++; continue; }
+    const words = tokenize(para.text);
     for(let i=0;i<pairs.length;i++){
-      const re=wordRegex(pairs[i].orig);
-      const m=para.text.match(re);
-      if(m){ pool.push({text:para.text, matchWord:m[0], pairIdx:i, source:para.source, hash:h}); break; }
+      const re=wordRegexG(pairs[i].orig);
+      let m;
+      while((m=re.exec(para.text))){
+        const snippet = buildWindow(para.text, words, m.index);
+        if(!snippet) continue;
+        const h=hashText(snippet);
+        if(shown.has(h)){ skipped++; continue; }
+        pool.push({text:snippet, matchWord:m[0], pairIdx:i, source:para.source, hash:h});
+      }
     }
   }
-  $('loadstatus').textContent = allParas.length+' paragrafi letti — '+pool.length+' nuovi disponibili'+(skipped?' ('+skipped+' già proposti in passato)':'')+'.';
+  $('loadstatus').textContent = pool.length+' frasi pronte da pescare'+(skipped?' ('+skipped+' già proposte in passato)':'')+'.';
   updateFishState();
 }
 
@@ -281,6 +337,7 @@ $('pesca').onclick=()=>{
 function render(){
   const stage=$('stage');
   stage.classList.remove('empty');
+  stage.classList.remove('fadein'); void stage.offsetWidth; stage.classList.add('fadein');
   const re=wordRegex(current.substituted ? pairs[current.pairIdx].sub : current.matchWord);
   const displayed = current.substituted
     ? current.text.replace(wordRegex(current.matchWord), pairs[current.pairIdx].sub)
@@ -307,9 +364,10 @@ function persistSaved(list){
 function renderSaved(){
   const list=loadSaved();
   $('savedcount').textContent=list.length;
-  $('savedlist').innerHTML = list.map((s,i)=>
-    '<p>'+esc(s.text)+'<span class="src">'+esc(s.source)+'</span><a class="rm" href="#" data-i="'+i+'">rimuovi</a></p>'
-  ).join('');
+  $('savedlist').innerHTML = list.map((s,i)=>{
+    const body = s.bold ? esc(s.text).replace(wordRegex(s.bold), m=>'<b>'+m+'</b>') : esc(s.text);
+    return '<p>'+body+'<span class="src">'+esc(s.source)+'</span><a class="rm" href="#" data-i="'+i+'">rimuovi</a></p>';
+  }).join('');
 }
 $('savedlist').addEventListener('click',e=>{
   if(e.target.classList.contains('rm')){
@@ -323,11 +381,12 @@ $('savedlist').addEventListener('click',e=>{
 });
 $('salva').onclick=()=>{
   if(!current) return;
+  const activeWord = current.substituted ? pairs[current.pairIdx].sub : current.matchWord;
   const finalText = current.substituted
     ? current.text.replace(wordRegex(current.matchWord), pairs[current.pairIdx].sub)
     : current.text;
   const list=loadSaved();
-  list.push({text:finalText, source:current.source});
+  list.push({text:finalText, source:current.source, bold:activeWord});
   persistSaved(list);
   renderSaved();
 };
