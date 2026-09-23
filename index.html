@@ -4,331 +4,1746 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>pescafrasi</title>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
 <style>
 :root{
-  --paper:#efece3; --ink:#1d1b17; --rule:#c9c3b3; --pencil:#a13d2f; --dim:#7c7666;
-  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+  --paper:#efece3;
+  --ink:#1d1b17;
+  --rule:#c9c3b3;
+  --pencil:#a13d2f;
+  --dim:#7c7666;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
 }
+
 @media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){--paper:#17160f; --ink:#e8e4d8; --rule:#3a3628; --pencil:#e08a72; --dim:#8e8874;}
+  :root:not([data-theme="light"]){
+    --paper:#17160f;
+    --ink:#e8e4d8;
+    --rule:#3a3628;
+    --pencil:#e08a72;
+    --dim:#8e8874;
+  }
 }
-:root[data-theme="dark"]{--paper:#17160f; --ink:#e8e4d8; --rule:#3a3628; --pencil:#e08a72; --dim:#8e8874;}
-*{box-sizing:border-box;}
-html,body{margin:0;background:var(--paper);color:var(--ink);}
-body{font-family:Georgia,"Iowan Old Style",serif;line-height:1.5;padding:2rem 1.25rem 4rem;max-width:640px;margin:0 auto;}
-h1{font-size:1.05rem;font-weight:400;font-style:italic;letter-spacing:.02em;margin:0 0 .25rem;}
-.sub{font-family:ui-monospace,Menlo,monospace;font-size:.72rem;color:var(--dim);margin:0 0 2rem;}
-section{border-top:1px solid var(--rule);padding:1.1rem 0;}
-section:first-of-type{border-top:none;}
-label{display:block;font-family:ui-monospace,Menlo,monospace;font-size:.7rem;color:var(--dim);margin-bottom:.4rem;}
-textarea,input[type=text]{width:100%;font-family:ui-monospace,Menlo,monospace;font-size:.82rem;background:transparent;color:var(--ink);border:1px solid var(--rule);padding:.5rem .6rem;border-radius:2px;}
-textarea{min-height:4.5rem;resize:vertical;}
-input[type=file]{font-family:ui-monospace,Menlo,monospace;font-size:.75rem;color:var(--dim);width:100%;}
-button{font-family:ui-monospace,Menlo,monospace;font-size:.75rem;background:transparent;color:var(--ink);border:1px solid var(--ink);padding:.5rem .85rem;border-radius:2px;cursor:pointer;margin:.3rem .5rem .3rem 0;}
-button:hover{background:var(--ink);color:var(--paper);}
-button:disabled{opacity:.3;cursor:default;background:transparent;color:var(--ink);}
-button.ghost{border-color:var(--rule);color:var(--dim);}
-.status{font-family:ui-monospace,Menlo,monospace;font-size:.7rem;color:var(--dim);margin:.6rem 0;min-height:1em;}
-.stage{font-size:1.15rem;padding:1rem 0;min-height:3em;}
-.stage b{color:var(--pencil);font-weight:400;font-style:italic;border-bottom:1px solid var(--pencil);}
-.stage.empty{color:var(--dim);font-style:italic;font-size:.9rem;}
-.accum{font-size:.98rem;margin:.5rem 0 0;}
-.accum p{position:relative;margin:0 0 1.6em;padding-right:1.4em;}
-.accum p .rm{position:absolute;right:0;top:.15em;font-family:ui-monospace,Menlo,monospace;font-size:.65rem;color:var(--dim);text-decoration:none;opacity:.5;}
-.accum p .rm:hover{opacity:1;}
-.accum p .src{display:block;font-family:ui-monospace,Menlo,monospace;font-size:.65rem;color:var(--dim);margin-top:.25em;}
-.rowflex{display:flex;gap:.5rem;align-items:flex-start;flex-wrap:wrap;}
-.count{color:var(--dim);}
+
+:root[data-theme="dark"]{
+  --paper:#17160f;
+  --ink:#e8e4d8;
+  --rule:#3a3628;
+  --pencil:#e08a72;
+  --dim:#8e8874;
+}
+
+*{
+  box-sizing:border-box;
+}
+
+html,body{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+}
+
+body{
+  font-family:Georgia,"Iowan Old Style",serif;
+  line-height:1.5;
+  padding:2rem 1.25rem 4rem;
+  max-width:640px;
+  margin:0 auto;
+}
+
+h1{
+  font-size:1.05rem;
+  font-weight:400;
+  font-style:italic;
+  letter-spacing:.02em;
+  margin:0 0 .25rem;
+}
+
+.sub{
+  font-family:ui-monospace,Menlo,monospace;
+  font-size:.72rem;
+  color:var(--dim);
+  margin:0 0 2rem;
+}
+
+section{
+  border-top:1px solid var(--rule);
+  padding:1.1rem 0;
+}
+
+section:first-of-type{
+  border-top:none;
+}
+
+label{
+  display:block;
+  font-family:ui-monospace,Menlo,monospace;
+  font-size:.7rem;
+  color:var(--dim);
+  margin-bottom:.4rem;
+}
+
+textarea,
+input[type=text]{
+  width:100%;
+  font-family:ui-monospace,Menlo,monospace;
+  font-size:.82rem;
+  background:transparent;
+  color:var(--ink);
+  border:1px solid var(--rule);
+  padding:.5rem .6rem;
+  border-radius:2px;
+}
+
+textarea{
+  min-height:4.5rem;
+  resize:vertical;
+}
+
+input[type=file]{
+  font-family:ui-monospace,Menlo,monospace;
+  font-size:.75rem;
+  color:var(--dim);
+  width:100%;
+}
+
+button{
+  font-family:ui-monospace,Menlo,monospace;
+  font-size:.75rem;
+  background:transparent;
+  color:var(--ink);
+  border:1px solid var(--ink);
+  padding:.5rem .85rem;
+  border-radius:2px;
+  cursor:pointer;
+  margin:.3rem .5rem .3rem 0;
+}
+
+button:hover{
+  background:var(--ink);
+  color:var(--paper);
+}
+
+button:disabled{
+  opacity:.3;
+  cursor:default;
+  background:transparent;
+  color:var(--ink);
+}
+
+button.ghost{
+  border-color:var(--rule);
+  color:var(--dim);
+}
+
+.status{
+  font-family:ui-monospace,Menlo,monospace;
+  font-size:.7rem;
+  color:var(--dim);
+  margin:.6rem 0;
+  min-height:1em;
+}
+
+.stage{
+  font-size:1.15rem;
+  padding:1rem 0;
+  min-height:3em;
+}
+
+.stage b{
+  color:var(--pencil);
+  font-weight:400;
+  font-style:italic;
+  border-bottom:1px solid var(--pencil);
+}
+
+.stage.empty{
+  color:var(--dim);
+  font-style:italic;
+  font-size:.9rem;
+}
+
+.accum{
+  font-size:.98rem;
+  margin:.5rem 0 0;
+}
+
+.accum p{
+  position:relative;
+  margin:0 0 1.6em;
+  padding-right:1.4em;
+}
+
+.accum p .rm{
+  position:absolute;
+  right:0;
+  top:.15em;
+  font-family:ui-monospace,Menlo,monospace;
+  font-size:.65rem;
+  color:var(--dim);
+  text-decoration:none;
+  opacity:.5;
+}
+
+.accum p .rm:hover{
+  opacity:1;
+}
+
+.accum p .src{
+  display:block;
+  font-family:ui-monospace,Menlo,monospace;
+  font-size:.65rem;
+  color:var(--dim);
+  margin-top:.25em;
+}
+
+.rowflex{
+  display:flex;
+  gap:.5rem;
+  align-items:flex-start;
+  flex-wrap:wrap;
+}
+
+.count{
+  color:var(--dim);
+}
 </style>
 </head>
+
 <body>
 
 <h1>pescafrasi</h1>
-<p class="sub">estrae frasi da EPUB, sostituzione seriale parola&nbsp;→&nbsp;parola</p>
+
+<p class="sub">
+  estrae frasi da EPUB, sostituzione seriale parola&nbsp;→&nbsp;parola
+</p>
 
 <section id="cfg">
-  <label>coppie parola-target → sostituto — una per riga, formato "originale &gt; sostituto"</label>
-  <textarea id="pairs" placeholder="cosa &gt; poesia&#10;cose &gt; poesie"></textarea>
+
+  <label>
+    coppie parola-target → sostituto — una per riga,
+    formato "originale &gt; sostituto"
+  </label>
+
+  <textarea
+    id="pairs"
+    placeholder="cosa &gt; poesia&#10;cose &gt; poesie"
+  ></textarea>
+
   <div class="rowflex" style="margin-top:.5rem;">
     <button id="savecfg">salva coppie</button>
     <span class="status" id="cfgstatus"></span>
   </div>
+
 </section>
 
 <section id="upload">
+
   <label>carica uno o più file EPUB</label>
-  <input type="file" id="epubs" accept=".epub" multiple>
+
+  <input
+    type="file"
+    id="epubs"
+    accept=".epub"
+    multiple
+  >
+
   <div class="status" id="loadstatus"></div>
+
 </section>
 
 <section id="fish">
+
   <div class="rowflex">
-    <button id="pesca" disabled>pesca una frase</button>
-    <button id="sost" disabled>sostituisci</button>
-    <button id="salva" disabled>salva</button>
+
+    <button id="pesca" disabled>
+      pesca una frase
+    </button>
+
+    <button id="sost" disabled>
+      sostituisci
+    </button>
+
+    <button id="salva" disabled>
+      salva
+    </button>
+
   </div>
-  <div class="stage empty" id="stage">carica gli EPUB e imposta almeno una coppia per iniziare.</div>
+
+  <div class="stage empty" id="stage">
+    carica gli EPUB e imposta almeno una coppia per iniziare.
+  </div>
+
 </section>
 
 <section id="saved">
-  <label>frasi salvate (<span id="savedcount">0</span>)</label>
+
+  <label>
+    frasi salvate
+    (<span id="savedcount">0</span>)
+  </label>
+
   <div class="accum" id="savedlist"></div>
+
   <div class="rowflex" style="margin-top:.6rem;">
-    <button class="ghost" id="exportbtn">esporta .docx</button>
-    <button class="ghost" id="clearbtn">svuota</button>
+
+    <button class="ghost" id="exportbtn">
+      esporta .docx
+    </button>
+
+    <button class="ghost" id="clearbtn">
+      svuota
+    </button>
+
   </div>
+
 </section>
 
 <script>
-const $=id=>document.getElementById(id);
-let pairs=[]; // [{orig, sub}]
-let pool=[]; // [{text, matchWord, pairIdx}]
-let current=null; // {text, matchWord, pairIdx, substituted}
 
-function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;');}
+/* =========================================================
+   ELEMENTI PRINCIPALI
+   ========================================================= */
+
+const $ = id => document.getElementById(id);
+
+let pairs = [];
+let pool = [];
+let current = null;
+let allParas = [];
+
+
+/* =========================================================
+   INDEXEDDB
+   Gli EPUB vengono conservati nel browser anche dopo
+   la chiusura e riapertura dell'app.
+   ========================================================= */
+
+const DB_NAME = 'pescafrasi_db';
+const DB_VERSION = 1;
+const STORE_EPUBS = 'epubs';
+
+
+function openDB(){
+
+  return new Promise((resolve,reject)=>{
+
+    const request = indexedDB.open(
+      DB_NAME,
+      DB_VERSION
+    );
+
+    request.onupgradeneeded = event => {
+
+      const db = event.target.result;
+
+      if(!db.objectStoreNames.contains(STORE_EPUBS)){
+
+        db.createObjectStore(
+          STORE_EPUBS,
+          {keyPath:'id'}
+        );
+
+      }
+    };
+
+    request.onsuccess = () => {
+
+      resolve(request.result);
+
+    };
+
+    request.onerror = () => {
+
+      reject(request.error);
+
+    };
+
+  });
+
+}
+
+
+/*
+   Crea un identificatore del file.
+   Se lo stesso EPUB viene caricato due volte,
+   non viene duplicato nel database.
+*/
+
+async function makeFileId(file,buffer){
+
+  const data = new Uint8Array(buffer);
+
+  let hash = 0;
+
+  const step =
+    Math.max(
+      1,
+      Math.floor(data.length / 10000)
+    );
+
+  for(
+    let i = 0;
+    i < data.length;
+    i += step
+  ){
+
+    hash =
+      ((hash * 31) + data[i]) >>> 0;
+
+  }
+
+  return [
+    file.name,
+    file.size,
+    file.lastModified,
+    hash
+  ].join('|');
+
+}
+
+
+/*
+   Salva fisicamente l'EPUB in IndexedDB.
+*/
+
+async function saveEpub(file){
+
+  const buffer =
+    await file.arrayBuffer();
+
+  const id =
+    await makeFileId(
+      file,
+      buffer
+    );
+
+  const record = {
+
+    id:id,
+
+    name:file.name,
+
+    type:
+      file.type ||
+      'application/epub+zip',
+
+    size:file.size,
+
+    lastModified:
+      file.lastModified,
+
+    data:buffer
+
+  };
+
+  const db =
+    await openDB();
+
+  return new Promise((resolve,reject)=>{
+
+    const transaction =
+      db.transaction(
+        STORE_EPUBS,
+        'readwrite'
+      );
+
+    const store =
+      transaction.objectStore(
+        STORE_EPUBS
+      );
+
+    store.put(record);
+
+    transaction.oncomplete = () => {
+
+      db.close();
+
+      resolve(record);
+
+    };
+
+    transaction.onerror = () => {
+
+      db.close();
+
+      reject(transaction.error);
+
+    };
+
+  });
+
+}
+
+
+/*
+   Recupera tutti gli EPUB precedentemente salvati.
+*/
+
+async function getAllEpubs(){
+
+  const db =
+    await openDB();
+
+  return new Promise((resolve,reject)=>{
+
+    const transaction =
+      db.transaction(
+        STORE_EPUBS,
+        'readonly'
+      );
+
+    const store =
+      transaction.objectStore(
+        STORE_EPUBS
+      );
+
+    const request =
+      store.getAll();
+
+    request.onsuccess = () => {
+
+      db.close();
+
+      resolve(
+        request.result || []
+      );
+
+    };
+
+    request.onerror = () => {
+
+      db.close();
+
+      reject(request.error);
+
+    };
+
+  });
+
+}
+
+
+/* =========================================================
+   CONFIGURAZIONE COPPIE
+   ========================================================= */
+
+function esc(s){
+
+  return s
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;');
+
+}
+
 
 function loadCfg(){
+
   try{
-    const raw=localStorage.getItem('pescafrasi_pairs');
-    if(raw){ $('pairs').value=raw; parsePairs(); }
+
+    const raw =
+      localStorage.getItem(
+        'pescafrasi_pairs'
+      );
+
+    if(raw){
+
+      $('pairs').value = raw;
+
+      parsePairs();
+
+    }
+
   }catch(e){}
+
 }
+
+
 function parsePairs(){
-  const lines=$('pairs').value.split('\n').map(l=>l.trim()).filter(Boolean);
-  pairs=lines.map(l=>{
-    const [o,s]=l.split('>').map(x=>x.trim());
-    return {orig:o, sub:s};
-  }).filter(p=>p.orig && p.sub);
+
+  const lines =
+    $('pairs')
+      .value
+      .split('\n')
+      .map(l=>l.trim())
+      .filter(Boolean);
+
+  pairs =
+    lines
+      .map(l=>{
+
+        const [
+          original,
+          substitute
+        ] =
+          l
+            .split('>')
+            .map(x=>x.trim());
+
+        return {
+          orig:original,
+          sub:substitute
+        };
+
+      })
+      .filter(
+        p=>p.orig && p.sub
+      );
+
   updateFishState();
+
 }
-$('savecfg').onclick=()=>{
+
+
+$('savecfg').onclick = () => {
+
   parsePairs();
-  try{ localStorage.setItem('pescafrasi_pairs', $('pairs').value); }catch(e){}
-  $('cfgstatus').textContent = pairs.length ? pairs.length+' coppie attive' : 'nessuna coppia valida';
+
+  try{
+
+    localStorage.setItem(
+      'pescafrasi_pairs',
+      $('pairs').value
+    );
+
+  }catch(e){}
+
+  $('cfgstatus').textContent =
+    pairs.length
+      ? pairs.length +
+        ' coppie attive'
+      : 'nessuna coppia valida';
+
   rebuildPool();
+
 };
+
+
+/* =========================================================
+   PAROLE
+   ========================================================= */
 
 function wordRegex(word){
-  return new RegExp('(?<![A-Za-zÀ-ÿ])('+word.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')(?![A-Za-zÀ-ÿ])','i');
+
+  return new RegExp(
+
+    '(?<![A-Za-zÀ-ÿ])(' +
+
+    word.replace(
+      /[.*+?^${}()|[\]\\]/g,
+      '\\$&'
+    ) +
+
+    ')(?![A-Za-zÀ-ÿ])',
+
+    'i'
+
+  );
+
 }
+
+
+/* =========================================================
+   HASH DELLE FRASI
+   Serve a non riproporre continuamente la stessa frase.
+   ========================================================= */
 
 function hashText(s){
-  let h=5381;
-  for(let i=0;i<s.length;i++) h=((h*33)^s.charCodeAt(i))>>>0;
+
+  let h = 5381;
+
+  for(
+    let i=0;
+    i<s.length;
+    i++
+  ){
+
+    h =
+      ((h * 33) ^
+      s.charCodeAt(i)) >>> 0;
+
+  }
+
   return h.toString(36);
+
 }
+
 
 function loadShown(){
-  try{ return new Set(JSON.parse(localStorage.getItem('pescafrasi_shown')||'[]')); }catch(e){ return new Set(); }
+
+  try{
+
+    return new Set(
+
+      JSON.parse(
+
+        localStorage.getItem(
+          'pescafrasi_shown'
+        ) || '[]'
+
+      )
+
+    );
+
+  }catch(e){
+
+    return new Set();
+
+  }
+
 }
+
+
 let shown = loadShown();
+
+
 function markShown(hash){
+
   shown.add(hash);
-  try{ localStorage.setItem('pescafrasi_shown', JSON.stringify([...shown])); }catch(e){}
+
+  try{
+
+    localStorage.setItem(
+
+      'pescafrasi_shown',
+
+      JSON.stringify(
+        [...shown]
+      )
+
+    );
+
+  }catch(e){}
+
 }
+
+
+/* =========================================================
+   LETTURA EPUB
+   ========================================================= */
 
 async function readEpub(file){
-  const zip = await JSZip.loadAsync(file);
-  const paras=[];
-  const names = Object.keys(zip.files).filter(n=>/\.(xhtml|html|htm)$/i.test(n));
-  for(const name of names){
-    const raw = await zip.files[name].async('string');
+
+  const zip =
+    await JSZip.loadAsync(file);
+
+  const paras = [];
+
+  const names =
+    Object.keys(zip.files)
+      .filter(
+        n=>/\.(xhtml|html|htm)$/i.test(n)
+      );
+
+  for(
+    const name of names
+  ){
+
+    const raw =
+      await zip.files[name]
+        .async('string');
+
     let doc;
-    try{ doc = new DOMParser().parseFromString(raw,'application/xhtml+xml'); }
-    catch(e){ doc = null; }
-    if(!doc || doc.querySelector('parsererror')) doc = new DOMParser().parseFromString(raw,'text/html');
-    doc.querySelectorAll('p').forEach(p=>{
-      const t=p.textContent.replace(/\s+/g,' ').trim();
-      if(t.length>15) paras.push({text:t, source:file.name});
-    });
+
+    try{
+
+      doc =
+        new DOMParser()
+          .parseFromString(
+            raw,
+            'application/xhtml+xml'
+          );
+
+    }catch(e){
+
+      doc = null;
+
+    }
+
+    if(
+      !doc ||
+      doc.querySelector('parsererror')
+    ){
+
+      doc =
+        new DOMParser()
+          .parseFromString(
+            raw,
+            'text/html'
+          );
+
+    }
+
+    doc
+      .querySelectorAll('p')
+      .forEach(p=>{
+
+        const text =
+          p.textContent
+            .replace(/\s+/g,' ')
+            .trim();
+
+        if(text.length > 15){
+
+          paras.push({
+
+            text:text,
+
+            source:file.name
+
+          });
+
+        }
+
+      });
+
   }
+
   return paras;
+
 }
 
-let allParas=[];
-$('epubs').onchange=async (e)=>{
-  const files=[...e.target.files];
-  if(!files.length) return;
-  $('loadstatus').textContent='lettura in corso…';
-  allParas=[];
-  for(const f of files){
-    try{
-      const paras = await readEpub(f);
-      allParas = allParas.concat(paras);
-    }catch(err){
-      $('loadstatus').textContent='errore su '+f.name+': impossibile leggerlo come EPUB.';
-      return;
+
+/* =========================================================
+   RECUPERA EPUB SALVATI ALL'APERTURA
+   ========================================================= */
+
+async function loadStoredEpubs(){
+
+  try{
+
+    $('loadstatus').textContent =
+      'recupero EPUB salvati…';
+
+    const records =
+      await getAllEpubs();
+
+    allParas = [];
+
+    for(
+      const record of records
+    ){
+
+      try{
+
+        const file =
+          new File(
+
+            [record.data],
+
+            record.name,
+
+            {
+
+              type:
+                record.type ||
+                'application/epub+zip',
+
+              lastModified:
+                record.lastModified ||
+                Date.now()
+
+            }
+
+          );
+
+        const paras =
+          await readEpub(file);
+
+        allParas =
+          allParas.concat(
+            paras
+          );
+
+      }catch(err){
+
+        console.error(
+          'Errore nella lettura dell’EPUB:',
+          record.name,
+          err
+        );
+
+      }
+
     }
+
+    if(records.length){
+
+      $('loadstatus').textContent =
+        allParas.length +
+        ' paragrafi recuperati da ' +
+        records.length +
+        ' EPUB salvati.';
+
+    }else{
+
+      $('loadstatus').textContent =
+        'nessun EPUB salvato.';
+
+    }
+
+    rebuildPool();
+
+  }catch(err){
+
+    console.error(err);
+
+    $('loadstatus').textContent =
+      'impossibile recuperare gli EPUB salvati.';
+
   }
-  $('loadstatus').textContent = allParas.length+' paragrafi letti da '+files.length+' file.';
-  rebuildPool();
-};
+
+}
+
+
+/* =========================================================
+   CARICAMENTO NUOVI EPUB
+   ========================================================= */
+
+$('epubs').onchange =
+  async event => {
+
+    const files =
+      [...event.target.files];
+
+    if(!files.length) return;
+
+    $('loadstatus').textContent =
+      'salvataggio degli EPUB…';
+
+    try{
+
+      /*
+         Prima salviamo i file.
+      */
+
+      for(
+        const file of files
+      ){
+
+        await saveEpub(file);
+
+      }
+
+      /*
+         Poi rileggiamo tutto
+         dal database.
+      */
+
+      await loadStoredEpubs();
+
+      $('loadstatus').textContent =
+        allParas.length +
+        ' paragrafi letti. EPUB salvati automaticamente.';
+
+    }catch(err){
+
+      console.error(err);
+
+      $('loadstatus').textContent =
+        'errore nel salvataggio o nella lettura degli EPUB.';
+
+    }
+
+    /*
+       Permette di scegliere nuovamente
+       lo stesso file.
+    */
+
+    event.target.value = '';
+
+  };
+
+
+/* =========================================================
+   COSTRUZIONE DEL POOL
+   ========================================================= */
 
 function rebuildPool(){
-  pool=[];
-  if(!pairs.length || !allParas.length){ updateFishState(); return; }
-  let skipped=0;
-  for(const para of allParas){
-    const h=hashText(para.text);
-    if(shown.has(h)){ skipped++; continue; }
-    for(let i=0;i<pairs.length;i++){
-      const re=wordRegex(pairs[i].orig);
-      const m=para.text.match(re);
-      if(m){ pool.push({text:para.text, matchWord:m[0], pairIdx:i, source:para.source, hash:h}); break; }
-    }
+
+  pool = [];
+
+  if(
+    !pairs.length ||
+    !allParas.length
+  ){
+
+    updateFishState();
+
+    return;
+
   }
-  $('loadstatus').textContent = allParas.length+' paragrafi letti — '+pool.length+' nuovi disponibili'+(skipped?' ('+skipped+' già proposti in passato)':'')+'.';
+
+  let skipped = 0;
+
+  for(
+    const para of allParas
+  ){
+
+    const hash =
+      hashText(
+        para.text
+      );
+
+    if(shown.has(hash)){
+
+      skipped++;
+
+      continue;
+
+    }
+
+    for(
+      let i=0;
+      i<pairs.length;
+      i++
+    ){
+
+      const regex =
+        wordRegex(
+          pairs[i].orig
+        );
+
+      const match =
+        para.text.match(regex);
+
+      if(match){
+
+        pool.push({
+
+          text:para.text,
+
+          matchWord:match[0],
+
+          pairIdx:i,
+
+          source:para.source,
+
+          hash:hash
+
+        });
+
+        break;
+
+      }
+
+    }
+
+  }
+
+  $('loadstatus').textContent =
+    allParas.length +
+    ' paragrafi letti — ' +
+    pool.length +
+    ' nuovi disponibili' +
+    (
+      skipped
+        ? ' (' +
+          skipped +
+          ' già proposti in passato)'
+        : ''
+    ) +
+    '.';
+
   updateFishState();
+
 }
+
 
 function updateFishState(){
-  $('pesca').disabled = pool.length===0;
+
+  $('pesca').disabled =
+    pool.length === 0;
+
 }
 
-$('pesca').onclick=()=>{
-  const idx = Math.floor(Math.random()*pool.length);
-  const item = pool[idx];
-  current = {text:item.text, matchWord:item.matchWord, pairIdx:item.pairIdx, source:item.source, substituted:false};
-  markShown(item.hash);
-  pool.splice(idx,1);
+
+/* =========================================================
+   PESCA
+   ========================================================= */
+
+$('pesca').onclick = () => {
+
+  if(!pool.length) return;
+
+  const index =
+    Math.floor(
+      Math.random() *
+      pool.length
+    );
+
+  const item =
+    pool[index];
+
+  current = {
+
+    text:item.text,
+
+    matchWord:item.matchWord,
+
+    pairIdx:item.pairIdx,
+
+    source:item.source,
+
+    substituted:false
+
+  };
+
+  markShown(
+    item.hash
+  );
+
+  pool.splice(
+    index,
+    1
+  );
+
   render();
-  $('sost').disabled=false;
-  $('salva').disabled=false;
+
+  $('sost').disabled = false;
+
+  $('salva').disabled = false;
+
   updateFishState();
-  if(pool.length===0) $('loadstatus').textContent='nessun altro paragrafo nuovo disponibile in questa sessione.';
+
+  if(!pool.length){
+
+    $('loadstatus').textContent =
+      'nessun altro paragrafo nuovo disponibile.';
+
+  }
+
 };
+
+
+/* =========================================================
+   RENDER FRASE
+   ========================================================= */
 
 function render(){
-  const stage=$('stage');
-  stage.classList.remove('empty');
-  const re=wordRegex(current.substituted ? pairs[current.pairIdx].sub : current.matchWord);
-  const displayed = current.substituted
-    ? current.text.replace(wordRegex(current.matchWord), pairs[current.pairIdx].sub)
-    : current.text;
-  const html = esc(displayed).replace(re, m=>'<b>'+m+'</b>');
-  stage.innerHTML = html;
+
+  const stage =
+    $('stage');
+
+  stage.classList.remove(
+    'empty'
+  );
+
+  const displayed =
+    current.substituted
+
+      ? current.text.replace(
+
+          wordRegex(
+            current.matchWord
+          ),
+
+          pairs[
+            current.pairIdx
+          ].sub
+
+        )
+
+      : current.text;
+
+  /*
+     Se abbiamo sostituito la parola,
+     evidenziamo la nuova parola.
+  */
+
+  const wordToHighlight =
+    current.substituted
+
+      ? pairs[
+          current.pairIdx
+        ].sub
+
+      : current.matchWord;
+
+  const regex =
+    wordRegex(
+      wordToHighlight
+    );
+
+  const html =
+    esc(displayed)
+      .replace(
+        regex,
+        match =>
+          '<b>' +
+          match +
+          '</b>'
+      );
+
+  stage.innerHTML =
+    html;
+
 }
 
-$('sost').onclick=()=>{
-  if(!current || current.substituted) return;
-  current.substituted=true;
+
+/* =========================================================
+   SOSTITUZIONE
+   ========================================================= */
+
+$('sost').onclick = () => {
+
+  if(
+    !current ||
+    current.substituted
+  ){
+
+    return;
+
+  }
+
+  current.substituted =
+    true;
+
   render();
+
 };
+
+
+/* =========================================================
+   FRASI SALVATE
+   ========================================================= */
 
 function loadSaved(){
+
   try{
-    const raw=JSON.parse(localStorage.getItem('pescafrasi_saved')||'[]');
-    return raw.map(x=> typeof x==='string' ? {text:x, source:'—'} : x);
-  }catch(e){ return []; }
+
+    const raw =
+      JSON.parse(
+
+        localStorage.getItem(
+          'pescafrasi_saved'
+        ) || '[]'
+
+      );
+
+    return raw.map(
+      item =>
+
+        typeof item === 'string'
+
+          ? {
+              text:item,
+              source:'—'
+            }
+
+          : item
+
+    );
+
+  }catch(e){
+
+    return [];
+
+  }
+
 }
+
+
 function persistSaved(list){
-  try{ localStorage.setItem('pescafrasi_saved', JSON.stringify(list)); }catch(e){}
-}
-function renderSaved(){
-  const list=loadSaved();
-  $('savedcount').textContent=list.length;
-  $('savedlist').innerHTML = list.map((s,i)=>
-    '<p>'+esc(s.text)+'<span class="src">'+esc(s.source)+'</span><a class="rm" href="#" data-i="'+i+'">rimuovi</a></p>'
-  ).join('');
-}
-$('savedlist').addEventListener('click',e=>{
-  if(e.target.classList.contains('rm')){
-    e.preventDefault();
-    const i=+e.target.dataset.i;
-    const list=loadSaved();
-    list.splice(i,1);
-    persistSaved(list);
-    renderSaved();
-  }
-});
-$('salva').onclick=()=>{
-  if(!current) return;
-  const finalText = current.substituted
-    ? current.text.replace(wordRegex(current.matchWord), pairs[current.pairIdx].sub)
-    : current.text;
-  const list=loadSaved();
-  list.push({text:finalText, source:current.source});
-  persistSaved(list);
-  renderSaved();
-};
-function xmlEsc(s){
-  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-function docxPara(text, opts){
-  opts = opts || {};
-  const spacing = opts.spacing!=null ? opts.spacing : 240;
-  let run = '<w:r><w:t xml:space="preserve">'+xmlEsc(text)+'</w:t></w:r>';
-  if(opts.supNum!=null){
-    run += '<w:r><w:rPr><w:vertAlign w:val="superscript"/></w:rPr><w:t>'+opts.supNum+'</w:t></w:r>';
-  }
-  let rPr='';
-  if(opts.bold) rPr='<w:rPr><w:b/></w:rPr>';
-  if(opts.small) rPr='<w:rPr><w:sz w:val="18"/></w:rPr>';
-  if(rPr){ run = run.replace('<w:r>','<w:r>'+rPr); }
-  return '<w:p><w:pPr><w:spacing w:after="'+spacing+'"/></w:pPr>'+run+'</w:p>';
-}
-async function buildDocx(list){
-  const body = list.map((s,i)=> docxPara(s.text, {supNum:i+1, spacing:240})).join('');
-  const heading = docxPara('Fonti', {bold:true, spacing:160});
-  const notes = list.map((s,i)=> docxPara((i+1)+'. '+s.source, {small:true, spacing:60})).join('');
-  const documentXml =
-'<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
-'<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">'+
-'<w:body>'+body+heading+notes+'<w:sectPr/></w:body></w:document>';
-  const contentTypes =
-'<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
-'<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'+
-'<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>'+
-'<Default Extension="xml" ContentType="application/xml"/>'+
-'<Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>'+
-'</Types>';
-  const rootRels =
-'<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
-'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'+
-'<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>'+
-'</Relationships>';
-  const zip = new JSZip();
-  zip.file('[Content_Types].xml', contentTypes);
-  zip.folder('_rels').file('.rels', rootRels);
-  zip.folder('word').file('document.xml', documentXml);
-  return await zip.generateAsync({type:'blob', mimeType:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
-}
-$('exportbtn').onclick=async ()=>{
-  const list=loadSaved();
-  if(!list.length) return;
-  $('exportbtn').disabled=true;
-  const prevLabel=$('exportbtn').textContent;
-  $('exportbtn').textContent='genero…';
+
   try{
-    const blob = await buildDocx(list);
-    let cap=null;
-    try{ cap = window.claude ? await window.claude.use('downloads') : null; }catch(e){ cap=null; }
-    if(cap){
-      try{
-        await cap.save({filename:'pescafrasi.docx', data:blob});
-      }catch(err){
-        const a=document.createElement('a');
-        a.href=URL.createObjectURL(blob); a.download='pescafrasi.docx'; a.click();
-      }
-    } else {
-      const a=document.createElement('a');
-      a.href=URL.createObjectURL(blob); a.download='pescafrasi.docx'; a.click();
+
+    localStorage.setItem(
+
+      'pescafrasi_saved',
+
+      JSON.stringify(list)
+
+    );
+
+  }catch(e){}
+
+}
+
+
+function renderSaved(){
+
+  const list =
+    loadSaved();
+
+  $('savedcount').textContent =
+    list.length;
+
+  $('savedlist').innerHTML =
+    list
+      .map(
+        (item,index) =>
+
+          '<p>' +
+
+          esc(item.text) +
+
+          '<span class="src">' +
+
+          esc(item.source) +
+
+          '</span>' +
+
+          '<a class="rm" href="#" data-i="' +
+
+          index +
+
+          '">' +
+
+          'rimuovi' +
+
+          '</a>' +
+
+          '</p>'
+
+      )
+      .join('');
+
+}
+
+
+$('savedlist').addEventListener(
+  'click',
+  event => {
+
+    if(
+      event.target.classList.contains(
+        'rm'
+      )
+    ){
+
+      event.preventDefault();
+
+      const index =
+        +event.target.dataset.i;
+
+      const list =
+        loadSaved();
+
+      list.splice(
+        index,
+        1
+      );
+
+      persistSaved(
+        list
+      );
+
+      renderSaved();
+
     }
-  } finally {
-    $('exportbtn').disabled=false;
-    $('exportbtn').textContent=prevLabel;
+
   }
-};
-$('clearbtn').onclick=()=>{
-  if(confirm('Svuotare tutte le frasi salvate?')){
-    persistSaved([]);
-    renderSaved();
-  }
+);
+
+
+/* =========================================================
+   SALVA FRASE
+   ========================================================= */
+
+$('salva').onclick = () => {
+
+  if(!current) return;
+
+  const finalText =
+    current.substituted
+
+      ? current.text.replace(
+
+          wordRegex(
+            current.matchWord
+          ),
+
+          pairs[
+            current.pairIdx
+          ].sub
+
+        )
+
+      : current.text;
+
+  const list =
+    loadSaved();
+
+  list.push({
+
+    text:finalText,
+
+    source:current.source
+
+  });
+
+  persistSaved(
+    list
+  );
+
+  renderSaved();
+
 };
 
+
+/* =========================================================
+   ESPORTAZIONE DOCX
+   ========================================================= */
+
+function xmlEsc(s){
+
+  return s
+
+    .replace(
+      /&/g,
+      '&amp;'
+    )
+
+    .replace(
+      /</g,
+      '&lt;'
+    )
+
+    .replace(
+      />/g,
+      '&gt;'
+    )
+
+    .replace(
+      /"/g,
+      '&quot;'
+    );
+
+}
+
+
+function docxPara(
+  text,
+  options
+){
+
+  options =
+    options || {};
+
+  const spacing =
+    options.spacing != null
+
+      ? options.spacing
+
+      : 240;
+
+  let run =
+    '<w:r>' +
+    '<w:t xml:space="preserve">' +
+    xmlEsc(text) +
+    '</w:t>' +
+    '</w:r>';
+
+  if(
+    options.supNum != null
+  ){
+
+    run +=
+
+      '<w:r>' +
+
+      '<w:rPr>' +
+
+      '<w:vertAlign w:val="superscript"/>' +
+
+      '</w:rPr>' +
+
+      '<w:t>' +
+
+      options.supNum +
+
+      '</w:t>' +
+
+      '</w:r>';
+
+  }
+
+  let rPr = '';
+
+  if(options.bold){
+
+    rPr =
+      '<w:rPr><w:b/></w:rPr>';
+
+  }
+
+  if(options.small){
+
+    rPr =
+      '<w:rPr><w:sz w:val="18"/></w:rPr>';
+
+  }
+
+  if(rPr){
+
+    run =
+      run.replace(
+        '<w:r>',
+        '<w:r>' +
+        rPr
+      );
+
+  }
+
+  return
+
+    '<w:p>' +
+
+    '<w:pPr>' +
+
+    '<w:spacing w:after="' +
+    spacing +
+    '"/>' +
+
+    '</w:pPr>' +
+
+    run +
+
+    '</w:p>';
+
+}
+
+
+async function buildDocx(list){
+
+  const body =
+    list
+      .map(
+        (item,index) =>
+
+          docxPara(
+
+            item.text,
+
+            {
+              supNum:index+1,
+              spacing:240
+            }
+
+          )
+
+      )
+      .join('');
+
+  const heading =
+    docxPara(
+
+      'Fonti',
+
+      {
+        bold:true,
+        spacing:160
+      }
+
+    );
+
+  const notes =
+    list
+      .map(
+        (item,index) =>
+
+          docxPara(
+
+            (index+1) +
+            '. ' +
+            item.source,
+
+            {
+              small:true,
+              spacing:60
+            }
+
+          )
+
+      )
+      .join('');
+
+  const documentXml =
+
+    '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+
+    '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">' +
+
+    '<w:body>' +
+
+    body +
+
+    heading +
+
+    notes +
+
+    '<w:sectPr/>' +
+
+    '</w:body>' +
+
+    '</w:document>';
+
+  const contentTypes =
+
+    '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+
+    '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">' +
+
+    '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>' +
+
+    '<Default Extension="xml" ContentType="application/xml"/>' +
+
+    '<Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>' +
+
+    '</Types>';
+
+  const rootRels =
+
+    '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+
+    '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+
+    '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>' +
+
+    '</Relationships>';
+
+  const zip =
+    new JSZip();
+
+  zip.file(
+    '[Content_Types].xml',
+    contentTypes
+  );
+
+  zip
+    .folder('_rels')
+    .file(
+      '.rels',
+      rootRels
+    );
+
+  zip
+    .folder('word')
+    .file(
+      'document.xml',
+      documentXml
+    );
+
+  return await zip.generateAsync({
+
+    type:'blob',
+
+    mimeType:
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+
+  });
+
+}
+
+
+$('exportbtn').onclick =
+  async () => {
+
+    const list =
+      loadSaved();
+
+    if(!list.length) return;
+
+    $('exportbtn').disabled =
+      true;
+
+    const previousLabel =
+      $('exportbtn').textContent;
+
+    $('exportbtn').textContent =
+      'genero…';
+
+    try{
+
+      const blob =
+        await buildDocx(
+          list
+        );
+
+      const link =
+        document.createElement('a');
+
+      const url =
+        URL.createObjectURL(
+          blob
+        );
+
+      link.href = url;
+
+      link.download =
+        'pescafrasi.docx';
+
+      document.body.appendChild(
+        link
+      );
+
+      link.click();
+
+      link.remove();
+
+      setTimeout(
+        () =>
+          URL.revokeObjectURL(
+            url
+          ),
+        1000
+      );
+
+    }finally{
+
+      $('exportbtn').disabled =
+        false;
+
+      $('exportbtn').textContent =
+        previousLabel;
+
+    }
+
+  };
+
+
+/* =========================================================
+   SVUOTA FRASI
+   ========================================================= */
+
+$('clearbtn').onclick = () => {
+
+  if(
+    confirm(
+      'Svuotare tutte le frasi salvate?'
+    )
+  ){
+
+    persistSaved([]);
+
+    renderSaved();
+
+  }
+
+};
+
+
+/* =========================================================
+   AVVIO DELL'APP
+   ========================================================= */
+
 loadCfg();
+
 renderSaved();
+
+/*
+   Questa è la parte fondamentale:
+   quando riapri l'app, gli EPUB vengono
+   recuperati automaticamente da IndexedDB.
+*/
+
+loadStoredEpubs();
+
 </script>
+
 </body>
 </html>
